@@ -10,6 +10,10 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    if (session.user.role !== 'PRACTITIONER') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const tomorrow = new Date(today)
@@ -55,6 +59,9 @@ export async function GET() {
           gte: weekStart,
           lt: weekEnd
         }
+      },
+      select: {
+        clientId: true
       }
     })
 
@@ -70,7 +77,7 @@ export async function GET() {
     })
 
     // Get unique clients this week
-    const uniqueClients = new Set(weekAppointments.map((apt: any) => apt.clientId))
+    const uniqueClients = new Set(weekAppointments.map((appointment) => appointment.clientId))
     const activeClients = uniqueClients.size
 
     return NextResponse.json({

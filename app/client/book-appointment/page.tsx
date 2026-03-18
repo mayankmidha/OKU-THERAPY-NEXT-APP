@@ -1,255 +1,242 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
-interface Practitioner {
+type Service = {
   id: string
   name: string
+  description: string | null
+  duration: number
+  price: number
+}
+
+type Practitioner = {
+  id: string
+  name: string | null
   email: string
-  practitionerProfile?: {
+  practitionerProfile: {
     specialization: string[]
-    bio: string
-    hourlyRate?: number
-    licenseNumber?: string
-  }
+    bio: string | null
+    hourlyRate: number | null
+  } | null
+}
+
+type BookingDataResponse = {
+  services: Service[]
+  practitioners: Practitioner[]
 }
 
 export default function BookAppointmentPage() {
+  const router = useRouter()
+  const [services, setServices] = useState<Service[]>([])
+  const [practitioners, setPractitioners] = useState<Practitioner[]>([])
+  const [selectedService, setSelectedService] = useState('')
   const [selectedPractitioner, setSelectedPractitioner] = useState('')
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
   const [notes, setNotes] = useState('')
-  const [specialization, setSpecialization] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [practitioners, setPractitioners] = useState<Practitioner[]>([])
-  const [isLoadingPractitioners, setIsLoadingPractitioners] = useState(true)
-  const router = useRouter()
-
-  const specializations = [
-    'Anxiety', 'Depression', 'Trauma', 'Relationships', 
-    'ADHD', 'Bipolar Disorder', 'Eating Disorders', 'OCD',
-    'PTSD', 'Substance Abuse', 'Grief', 'Stress Management'
-  ]
+  const [message, setMessage] = useState('')
 
   useEffect(() => {
-    fetchPractitioners()
+    const fetchBookingData = async () => {
+      try {
+        const response = await fetch('/api/client/book')
+
+        if (response.ok) {
+          const data = (await response.json()) as BookingDataResponse
+          setServices(data.services)
+          setPractitioners(data.practitioners)
+        }
+      } catch (error) {
+        console.error('Error fetching booking data:', error)
+      }
+    }
+
+    void fetchBookingData()
   }, [])
 
-  const fetchPractitioners = async () => {
-    try {
-      const response = await fetch('/api/practitioners')
-      if (response.ok) {
-        const data = await response.json()
-        setPractitioners(data)
-      }
-    } catch (error) {
-      console.error('Error fetching practitioners:', error)
-    } finally {
-      setIsLoadingPractitioners(false)
-    }
-  }
-
-  const filteredPractitioners = practitioners.filter(practitioner => 
-    !specialization || practitioner.practitionerProfile?.specialization?.some(spec => 
-      spec.toLowerCase().includes(specialization.toLowerCase())
-    )
-  )
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
     setIsLoading(true)
-    setError('')
+    setMessage('')
 
-    if (!selectedPractitioner || !selectedDate || !selectedTime) {
-      setError('Please fill in all required fields')
+    if (!selectedService || !selectedPractitioner || !selectedDate || !selectedTime) {
+      setMessage('Please fill in all required fields.')
       setIsLoading(false)
       return
     }
 
     try {
-      const response = await fetch('/api/client/appointments', {
+      const startTime = new Date(`${selectedDate}T${selectedTime}`)
+
+      const response = await fetch('/api/client/book', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           practitionerId: selectedPractitioner,
-          startTime: `${selectedDate}T${selectedTime}`,
-          notes
+          serviceId: selectedService,
+          startTime: startTime.toISOString(),
+          notes,
         }),
       })
 
-      if (response.ok) {
-        router.push('/client/dashboard?message=Appointment booked successfully')
-      } else {
-        const data = await response.json()
-        setError(data.error || 'Failed to book appointment')
+      if (!response.ok) {
+        const data = (await response.json()) as { error?: string }
+        setMessage(data.error ?? 'Failed to book appointment.')
+        return
       }
-    } catch (error) {
-      setError('An error occurred. Please try again.')
+
+      setMessage('Appointment booked successfully.')
+      window.setTimeout(() => {
+        router.push('/client/dashboard')
+      }, 800)
+    } catch {
+      setMessage('An error occurred. Please try again.')
     } finally {
       setIsLoading(false)
     }
   }
 
   const generateTimeSlots = () => {
-    const slots = []
-    for (let hour = 9; hour <= 17; hour++) {
+    const slots: string[] = []
+
+    for (let hour = 9; hour <= 17; hour += 1) {
       for (let minute = 0; minute < 60; minute += 30) {
-        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
-        slots.push(time)
+        const slot = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
+        slots.push(slot)
       }
     }
-    return slots
-  }
 
-  if (isLoadingPractitioners) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Loading practitioners...</p>
-        </div>
-      </div>
-    )
+    return slots
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/client/dashboard" className="text-blue-600 hover:text-blue-800 font-medium">
-                ← Back to Dashboard
-              </Link>
-            </div>
-          </div>
+      <header className="bg-white shadow-sm">
+        <div className="mx-auto flex h-16 max-w-4xl items-center px-4 sm:px-6 lg:px-8">
+          <Link className="font-medium text-blue-600 hover:text-blue-800" href="/client/dashboard">
+            ← Back to Dashboard
+          </Link>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Book an Appointment</h1>
+      <main className="mx-auto max-w-4xl py-8 sm:px-6 lg:px-8">
+        <div className="rounded-lg bg-white shadow">
+          <div className="border-b border-gray-200 px-6 py-4">
+            <h1 className="text-2xl font-bold text-gray-900">Book an appointment</h1>
+            <p className="mt-1 text-gray-600">Choose a practitioner, service, date, and time.</p>
+          </div>
 
-          {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-              {error}
-            </div>
-          )}
+          <form className="space-y-6 p-6" onSubmit={handleSubmit}>
+            {message ? (
+              <div className="rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+                {message}
+              </div>
+            ) : null}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Specialization Filter */}
             <div>
-              <label htmlFor="specialization" className="block text-sm font-medium text-gray-700 mb-2">
-                Filter by Specialization (optional)
+              <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="service">
+                Service
               </label>
               <select
-                id="specialization"
-                value={specialization}
-                onChange={(e) => setSpecialization(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">All Specializations</option>
-                {specializations.map(spec => (
-                  <option key={spec} value={spec}>{spec}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Practitioner Selection */}
-            <div>
-              <label htmlFor="practitioner" className="block text-sm font-medium text-gray-700 mb-2">
-                Select Practitioner *
-              </label>
-              <select
-                id="practitioner"
-                value={selectedPractitioner}
-                onChange={(e) => setSelectedPractitioner(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                id="service"
                 required
+                value={selectedService}
+                onChange={(event) => setSelectedService(event.target.value)}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Choose a practitioner...</option>
-                {filteredPractitioners.map((practitioner) => (
-                  <option key={practitioner.id} value={practitioner.id}>
-                    {practitioner.name} - {practitioner.practitionerProfile?.specialization?.join(', ') || 'General'}
+                <option value="">Choose a service...</option>
+                {services.map((service) => (
+                  <option key={service.id} value={service.id}>
+                    {service.name} ({service.duration} min) - ${service.price}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Date Selection */}
             <div>
-              <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-                Select Date *
-              </label>
-              <input
-                type="date"
-                id="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-
-            {/* Time Selection */}
-            <div>
-              <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
-                Select Time *
+              <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="practitioner">
+                Practitioner
               </label>
               <select
-                id="time"
-                value={selectedTime}
-                onChange={(e) => setSelectedTime(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                id="practitioner"
                 required
+                value={selectedPractitioner}
+                onChange={(event) => setSelectedPractitioner(event.target.value)}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Choose a time...</option>
-                {generateTimeSlots().map((time) => (
-                  <option key={time} value={time}>{time}</option>
+                <option value="">Choose a practitioner...</option>
+                {practitioners.map((practitioner) => (
+                  <option key={practitioner.id} value={practitioner.id}>
+                    {practitioner.name} - {practitioner.practitionerProfile?.specialization.join(', ') ?? 'General practice'}
+                  </option>
                 ))}
               </select>
             </div>
 
-            {/* Notes */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="date">
+                  Date
+                </label>
+                <input
+                  id="date"
+                  type="date"
+                  required
+                  min={new Date().toISOString().split('T')[0]}
+                  value={selectedDate}
+                  onChange={(event) => setSelectedDate(event.target.value)}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="time">
+                  Time
+                </label>
+                <select
+                  id="time"
+                  required
+                  value={selectedTime}
+                  onChange={(event) => setSelectedTime(event.target.value)}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Choose a time...</option>
+                  {generateTimeSlots().map((time) => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             <div>
-              <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
-                Appointment Notes (optional)
+              <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="notes">
+                Notes
               </label>
               <textarea
                 id="notes"
-                rows={4}
+                rows={3}
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Any specific concerns or topics you'd like to discuss..."
+                onChange={(event) => setNotes(event.target.value)}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Anything you'd like your practitioner to know before the session"
               />
             </div>
 
-            {/* Submit Button */}
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? (
-                  <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Booking...
-                  </div>
-                ) : (
-                  'Book Appointment'
-                )}
-              </button>
-            </div>
+            <button
+              className="w-full rounded-md bg-blue-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isLoading}
+              type="submit"
+            >
+              {isLoading ? 'Booking...' : 'Book appointment'}
+            </button>
           </form>
         </div>
       </main>

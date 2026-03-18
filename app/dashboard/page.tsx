@@ -9,20 +9,28 @@ export default function DashboardPage() {
   const router = useRouter()
 
   useEffect(() => {
-    if (status === 'loading') return // Still loading
+    if (status === 'loading') return
     if (!session) {
-      router.push('/auth/signin')
+      router.replace('/auth/login')
       return
     }
 
-    // Redirect based on role
     if (session.user?.role === 'CLIENT') {
-      router.push('/dashboard/client')
-    } else if (session.user?.role === 'THERAPIST') {
-      router.push('/dashboard/therapist')
-    } else if (session.user?.role === 'ADMIN') {
-      router.push('/dashboard/admin')
+      router.replace('/client/dashboard')
+      return
     }
+
+    if (session.user?.role === 'PRACTITIONER') {
+      router.replace('/practitioner/dashboard')
+      return
+    }
+
+    if (session.user?.role === 'ADMIN') {
+      router.replace('/admin/dashboard')
+      return
+    }
+
+    router.replace('/auth/login')
   }, [session, status, router])
 
   if (status === 'loading') {

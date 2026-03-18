@@ -1,102 +1,83 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
-const assessments = [
+type AssessmentHistoryItem = {
+  id: string
+  score: number | null
+  completedAt: string
+  assessment: {
+    title: string
+    description: string | null
+  }
+}
+
+const availableAssessments = [
   {
     id: 'phq9',
     title: 'PHQ-9 Depression Assessment',
-    description: 'Screen for depression symptoms over the past 2 weeks',
+    description: 'A quick, evidence-based screening for depression symptoms over the past two weeks.',
     duration: '5 minutes',
     questions: 9,
-    icon: '😔',
-    color: 'blue'
+    icon: '📝',
   },
-  {
-    id: 'gad7',
-    title: 'GAD-7 Anxiety Assessment',
-    description: 'Assess anxiety severity and its impact on daily life',
-    duration: '5 minutes',
-    questions: 7,
-    icon: '😰',
-    color: 'yellow'
-  },
-  {
-    id: 'dass21',
-    title: 'DASS-21 Depression, Anxiety, and Stress Scale',
-    description: 'Comprehensive assessment of mental health symptoms',
-    duration: '10 minutes',
-    questions: 21,
-    icon: '📊',
-    color: 'purple'
-  },
-  {
-    id: 'adhd',
-    title: 'ADHD Self-Assessment',
-    description: 'Screen for symptoms of ADHD in adults',
-    duration: '10 minutes',
-    questions: 18,
-    icon: '🧠',
-    color: 'orange'
-  },
-  {
-    id: 'ptsd',
-    title: 'PTSD Screening',
-    description: 'Assess symptoms related to traumatic events',
-    duration: '8 minutes',
-    questions: 5,
-    icon: '⚡',
-    color: 'red'
-  }
-]
+] as const
 
 export default function AssessmentsPage() {
-  const [completedAssessments, setCompletedAssessments] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+  const [completedAssessments, setCompletedAssessments] = useState<AssessmentHistoryItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    fetchAssessmentHistory()
+    const fetchAssessmentHistory = async () => {
+      try {
+        const response = await fetch('/api/client/assessments')
+
+        if (response.ok) {
+          const data = (await response.json()) as AssessmentHistoryItem[]
+          setCompletedAssessments(data)
+        }
+      } catch (error) {
+        console.error('Error fetching assessment history:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void fetchAssessmentHistory()
   }, [])
 
-  const fetchAssessmentHistory = async () => {
-    try {
-      const response = await fetch('/api/client/assessments')
-      if (response.ok) {
-        const data = await response.json()
-        setCompletedAssessments(data)
-      }
-    } catch (error) {
-      console.error('Error fetching assessment history:', error)
-    } finally {
-      setIsLoading(false)
+  const latestPhq9Score = completedAssessments.find(
+    (assessment) => assessment.assessment.title === 'PHQ-9 Depression Assessment'
+  )?.score
+
+  const getScoreColor = (score: number | null | undefined) => {
+    if (score === null || score === undefined) {
+      return 'text-gray-400'
     }
-  }
 
-  const handleStartAssessment = (assessmentId: string) => {
-    router.push(`/client/assessments/${assessmentId}`)
-  }
+    if (score <= 4) {
+      return 'text-green-600'
+    }
 
-  const getLatestScore = (assessmentId: string) => {
-    const assessment = completedAssessments.find((a: any) => a.assessment?.title?.includes(assessmentId.toUpperCase()))
-    return assessment && typeof assessment.score === 'number' ? assessment.score : null
-  }
+    if (score <= 9) {
+      return 'text-yellow-600'
+    }
 
-  const getScoreColor = (score: number | null) => {
-    if (score === null) return 'text-gray-400'
-    if (score !== null && score <= 4) return 'text-green-600'
-    if (score !== null && score <= 9) return 'text-yellow-600'
-    if (score !== null && score <= 14) return 'text-orange-600'
+    if (score <= 14) {
+      return 'text-orange-600'
+    }
+
     return 'text-red-600'
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
           <p className="mt-4 text-gray-600">Loading assessments...</p>
         </div>
       </div>
@@ -105,114 +86,98 @@ export default function AssessmentsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/client/dashboard" className="text-blue-600 hover:text-blue-800 font-medium">
-                ← Back to Dashboard
-              </Link>
-            </div>
-          </div>
+      <header className="border-b bg-white shadow-sm">
+        <div className="mx-auto flex h-16 max-w-6xl items-center px-4 sm:px-6 lg:px-8">
+          <Link className="font-medium text-blue-600 hover:text-blue-800" href="/client/dashboard">
+            ← Back to Dashboard
+          </Link>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto py-6 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-6xl py-6 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Mental Health Assessments</h1>
-          <p className="text-gray-600 text-lg">
-            Take evidence-based assessments to better understand your mental health and track your progress over time.
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">Mental Health Assessments</h1>
+          <p className="text-lg text-gray-600">
+            Phase 1 keeps assessments focused on PHQ-9 so the client experience stays production-buildable.
           </p>
         </div>
 
-        {/* Available Assessments */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {assessments.map((assessment) => (
-            <div
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+          {availableAssessments.map((assessment) => (
+            <button
+              className="rounded-lg bg-white p-6 text-left shadow-lg transition hover:shadow-xl"
               key={assessment.id}
-              className="bg-white shadow-lg rounded-lg p-6 hover:shadow-xl transition-shadow duration-200 cursor-pointer"
-              onClick={() => handleStartAssessment(assessment.id)}
+              onClick={() => router.push('/client/assessments/phq9')}
+              type="button"
             >
-              <div className="flex items-center mb-4">
-                <div className="text-4xl mr-4">{assessment.icon}</div>
+              <div className="mb-4 flex items-center">
+                <div className="mr-4 text-4xl">{assessment.icon}</div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">{assessment.title}</h3>
                   <p className="text-sm text-gray-600">{assessment.duration}</p>
                 </div>
               </div>
-              <p className="text-gray-700 mb-4">{assessment.description}</p>
-              <div className="flex justify-between items-center">
+
+              <p className="mb-4 text-gray-700">{assessment.description}</p>
+              <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-500">{assessment.questions} questions</span>
-                <button className={`px-4 py-2 rounded-md text-white font-medium transition-colors duration-200 ${
-                  assessment.color === 'blue' ? 'bg-blue-600 hover:bg-blue-700' :
-                  assessment.color === 'yellow' ? 'bg-yellow-600 hover:bg-yellow-700' :
-                  assessment.color === 'purple' ? 'bg-purple-600 hover:bg-purple-700' :
-                  assessment.color === 'orange' ? 'bg-orange-600 hover:bg-orange-700' :
-                  'bg-red-600 hover:bg-red-700'
-                }`}>
+                <span className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white">
                   Start Assessment
-                </button>
+                </span>
               </div>
-              {getLatestScore(assessment.id) !== null && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Latest Score:</span>
-                    <span className={`font-bold ${getScoreColor(getLatestScore(assessment.id)!)}`}>
-                      {getLatestScore(assessment.id)}/27
+
+              {latestPhq9Score !== null && latestPhq9Score !== undefined ? (
+                <div className="mt-4 border-t border-gray-200 pt-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Latest score</span>
+                    <span className={`font-bold ${getScoreColor(latestPhq9Score)}`}>
+                      {latestPhq9Score}/27
                     </span>
                   </div>
                 </div>
-              )}
-            </div>
+              ) : null}
+            </button>
           ))}
         </div>
 
-        {/* Assessment History */}
-        <div className="bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Assessment History</h2>
+        <div className="rounded-lg bg-white p-6 shadow-lg">
+          <h2 className="mb-6 text-xl font-semibold text-gray-900">Assessment History</h2>
           {completedAssessments.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                       Assessment
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                       Score
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                       Completed
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {completedAssessments.map((assessment: any) => (
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {completedAssessments.map((assessment) => (
                     <tr key={assessment.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {assessment.assessment?.title}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          assessment.score !== null && assessment.score !== undefined ? getScoreColor(assessment.score) : 'text-gray-400'
-                        }`}>
-                          {assessment.score !== null && assessment.score !== undefined ? assessment.score : 'N/A'}
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{assessment.assessment.title}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={getScoreColor(assessment.score)}>
+                          {assessment.score !== null ? assessment.score : 'N/A'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm text-gray-500">
                         {new Date(assessment.completedAt).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-6 py-4 text-sm font-medium">
                         <button
-                          onClick={() => handleStartAssessment(assessment.id)}
                           className="text-blue-600 hover:text-blue-900"
+                          onClick={() => router.push('/client/assessments/phq9')}
+                          type="button"
                         >
                           Retake
                         </button>
@@ -223,13 +188,13 @@ export default function AssessmentsPage() {
               </table>
             </div>
           ) : (
-            <div className="text-center py-8">
-              <div className="text-gray-400 text-5xl mb-4">📝</div>
-              <p className="text-gray-600 text-lg mb-4">No assessments completed yet</p>
-              <p className="text-gray-600">Take your first assessment to establish a baseline for your mental health journey.</p>
+            <div className="py-8 text-center">
+              <div className="mb-4 text-5xl text-gray-300">📝</div>
+              <p className="text-lg text-gray-600">No assessments completed yet.</p>
               <button
+                className="mt-6 rounded-md bg-blue-600 px-6 py-3 text-base font-medium text-white hover:bg-blue-700"
                 onClick={() => router.push('/client/assessments/phq9')}
-                className="mt-6 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                type="button"
               >
                 Start PHQ-9 Assessment
               </button>

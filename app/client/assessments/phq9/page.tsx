@@ -101,18 +101,14 @@ export default function PHQ9Assessment() {
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<Record<number, number>>({})
   const [isLoading, setIsLoading] = useState(false)
-  type SeverityLevel = {
-  level: string;
-  color: string;
-  description: string;
-}
-
-type ResultType = {
-  score: number | null;
-  severity: SeverityLevel | null;
-};
-
-const [result, setResult] = useState<ResultType | null>(null);
+  const [result, setResult] = useState<{
+    score: number
+    severity: {
+      color: string
+      description: string
+      level: string
+    }
+  } | null>(null)
   const router = useRouter()
 
   const handleAnswer = (questionId: number, value: number) => {
@@ -156,12 +152,14 @@ const [result, setResult] = useState<ResultType | null>(null);
       })
 
       if (response.ok) {
-        const severityData = {
-          level: severity.level,
-          color: severity.color,
-          description: severity.description
-        }
-        setResult(prev => ({ ...prev, score, severity: severityData }))
+        setResult({
+          score,
+          severity: {
+            color: severity.color,
+            description: severity.description,
+            level: severity.level,
+          },
+        })
       }
     } catch (error) {
       console.error('Error submitting assessment:', error)

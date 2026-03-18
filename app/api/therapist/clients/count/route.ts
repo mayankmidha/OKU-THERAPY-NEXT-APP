@@ -22,7 +22,7 @@ export async function GET() {
       }
     })
 
-    const uniqueClients = new Set(clientBookings.map((booking: any) => booking.clientId))
+    const uniqueClients = new Set(clientBookings.map((booking) => booking.clientId))
     const clientCount = uniqueClients.size
 
     return NextResponse.json({ count: clientCount })

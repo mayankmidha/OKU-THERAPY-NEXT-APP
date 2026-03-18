@@ -10,6 +10,10 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    if (session.user.role !== 'PRACTITIONER') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const clients = await prisma.appointment.findMany({
       where: {
         practitionerId: session.user.id,
