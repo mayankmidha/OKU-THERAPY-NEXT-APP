@@ -1,7 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
+
+import { AppShell, SectionCard, StatCard } from '@/components/brand-app-shell'
 
 type UserProfile = {
   email: string
@@ -38,47 +40,60 @@ export default function ClientProfilePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="mx-auto flex h-16 max-w-4xl items-center px-4 sm:px-6 lg:px-8">
-          <Link href="/client/dashboard" className="text-sm font-medium text-blue-600 hover:text-blue-800">
-            ← Back to Dashboard
-          </Link>
+    <AppShell
+      accentClassName="bg-[#2f6a5b]"
+      backHref="/client/dashboard"
+      backLabel="Back to dashboard"
+      description="This is the current MVP account summary. Editable profile fields can be layered in next without disrupting your current workspace."
+      eyebrow="Profile"
+      primaryAction={{ href: '/client/book-appointment', label: 'Book session' }}
+      secondaryAction={{ href: '/client/appointments', label: 'See appointments' }}
+      title="Your account details"
+    >
+      {isLoading ? (
+        <div className="rounded-[28px] border border-stone-200 bg-white/90 p-8 text-center shadow-[0_14px_40px_rgba(60,42,24,0.07)]">
+          Loading profile...
         </div>
-      </header>
+      ) : error ? (
+        <div className="rounded-[24px] border border-rose-200 bg-rose-50 px-6 py-5 text-sm text-rose-700">{error}</div>
+      ) : profile ? (
+        <div className="space-y-8">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <StatCard detail="Name on your current account." label="Name" value={profile.name || 'Not provided'} />
+            <StatCard detail="Primary email used to access the app." label="Email" value={profile.email} />
+            <StatCard detail="Phone number available for support and scheduling." label="Phone" value={profile.phone || 'Not provided'} />
+            <StatCard detail="Current role recognized by the platform." label="Role" value={profile.role} />
+          </div>
 
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="rounded-xl bg-white p-6 shadow">
-          <h1 className="text-2xl font-bold text-gray-900">Your Profile</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Basic account details for the current MVP. Editable profile management can come next.
-          </p>
-
-          {isLoading ? <p className="mt-6 text-sm text-gray-600">Loading profile...</p> : null}
-          {error ? <p className="mt-6 text-sm text-red-700">{error}</p> : null}
-
-          {profile ? (
-            <dl className="mt-6 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-lg bg-gray-50 p-4">
-                <dt className="text-xs uppercase tracking-wide text-gray-500">Name</dt>
-                <dd className="mt-1 text-sm font-medium text-gray-900">{profile.name || 'Not provided'}</dd>
+          <SectionCard
+            action={
+              <Link
+                className="rounded-full border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 transition hover:border-stone-400 hover:bg-stone-50"
+                href="/client/dashboard"
+              >
+                Return to dashboard
+              </Link>
+            }
+            description="The next product slice can add editable profile controls, preferences, and care history."
+            title="Profile status"
+          >
+            <div className="grid gap-5 md:grid-cols-2">
+              <div className="rounded-[24px] border border-stone-200 bg-stone-50 p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">Current MVP scope</p>
+                <p className="mt-3 text-sm leading-7 text-stone-700">
+                  Profile viewing is live. This keeps the account surface reliable while the editable workflow is built.
+                </p>
               </div>
-              <div className="rounded-lg bg-gray-50 p-4">
-                <dt className="text-xs uppercase tracking-wide text-gray-500">Email</dt>
-                <dd className="mt-1 text-sm font-medium text-gray-900">{profile.email}</dd>
+              <div className="rounded-[24px] border border-stone-200 bg-white p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">What is next</p>
+                <p className="mt-3 text-sm leading-7 text-stone-700">
+                  Notification preferences, richer personal details, and payment history can be added without changing the current route structure.
+                </p>
               </div>
-              <div className="rounded-lg bg-gray-50 p-4">
-                <dt className="text-xs uppercase tracking-wide text-gray-500">Phone</dt>
-                <dd className="mt-1 text-sm font-medium text-gray-900">{profile.phone || 'Not provided'}</dd>
-              </div>
-              <div className="rounded-lg bg-gray-50 p-4">
-                <dt className="text-xs uppercase tracking-wide text-gray-500">Role</dt>
-                <dd className="mt-1 text-sm font-medium text-gray-900">{profile.role}</dd>
-              </div>
-            </dl>
-          ) : null}
+            </div>
+          </SectionCard>
         </div>
-      </main>
-    </div>
+      ) : null}
+    </AppShell>
   )
 }

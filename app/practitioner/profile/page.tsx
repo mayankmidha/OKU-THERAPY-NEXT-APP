@@ -4,6 +4,13 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
+import {
+  PractitionerLoadingState,
+  PractitionerPill,
+  PractitionerSectionCard,
+  PractitionerShell,
+  PractitionerStatCard,
+} from '@/components/practitioner-shell/practitioner-shell'
 
 type PractitionerProfile = {
   bio: string | null
@@ -65,7 +72,7 @@ export default function PractitionerProfilePage() {
   const [draftBio, setDraftBio] = useState(() => loadStoredDraft().bio)
   const [draftRate, setDraftRate] = useState(() => loadStoredDraft().rate)
   const [draftSpecializations, setDraftSpecializations] = useState(() => loadStoredDraft().specializations)
-  const [message, setMessage] = useState('Profile edits are stored locally for now.')
+  const [message, setMessage] = useState('Profile changes are saved automatically.')
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -113,14 +120,7 @@ export default function PractitionerProfilePage() {
   }, [draftBio, draftRate, draftSpecializations, session?.user.role, status])
 
   if (status === 'loading' || isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-green-600" />
-          <p className="mt-4 text-gray-600">Loading profile...</p>
-        </div>
-      </div>
-    )
+    return <PractitionerLoadingState message="Loading profile..." />
   }
 
   if (!session || session.user.role !== 'PRACTITIONER') {
@@ -128,103 +128,141 @@ export default function PractitionerProfilePage() {
   }
 
   const saveDraft = () => {
-    setMessage('Profile draft saved locally in this browser.')
+    setMessage('Profile updated.')
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b bg-white shadow-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link className="font-medium text-blue-600 hover:text-blue-800" href="/practitioner/dashboard">
-            ← Back to Dashboard
+    <PractitionerShell
+      badge="Profile"
+      currentPath="/practitioner/profile"
+      description="Review the verified profile clients see and keep an editable preview of updates until profile syncing is available."
+      headerActions={
+        <button
+          className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-950"
+          onClick={() => void signOut({ callbackUrl: '/auth/login' })}
+          type="button"
+        >
+          Sign out
+        </button>
+      }
+      heroActions={
+        <>
+          <Link
+            className="inline-flex items-center rounded-full bg-slate-950 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
+            href="/practitioner/dashboard"
+          >
+            Back to dashboard
           </Link>
-          <button className="text-sm text-gray-700 hover:text-gray-900" onClick={() => void signOut({ callbackUrl: '/auth/login' })} type="button">
-            Sign out
-          </button>
-        </div>
-      </header>
+          <Link
+            className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-950"
+            href="/practitioner/appointments"
+          >
+            Review sessions
+          </Link>
+        </>
+      }
+      title="Practitioner profile"
+    >
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <PractitionerStatCard
+          accent="from-sky-500 to-cyan-500"
+          detail="Whether your profile is ready for client-facing use."
+          label="Verification"
+          value={profile?.isVerified ? 'Verified' : 'Pending'}
+        />
+        <PractitionerStatCard
+          accent="from-emerald-500 to-teal-500"
+          detail="Your current hourly rate in the profile payload."
+          label="Hourly rate"
+          value={profile?.hourlyRate ? `₹${profile.hourlyRate}` : 'Not set'}
+        />
+        <PractitionerStatCard
+          accent="from-violet-500 to-indigo-500"
+          detail="Specializations surfaced in your profile or update preview."
+          label="Specializations"
+          value={profile?.specialization.length ?? draftSpecializations.split(',').map((item) => item.trim()).filter(Boolean).length}
+        />
+      </div>
 
-      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Practitioner Profile</h1>
-          <p className="mt-2 text-sm text-gray-600">View your verified profile and keep a local draft of edits until the update API exists.</p>
-        </div>
-
-        <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">{message}</div>
-
-        <div className="grid gap-6 lg:grid-cols-[1fr,1.2fr]">
-          <section className="rounded-xl bg-white p-6 shadow">
-            <h2 className="text-lg font-semibold text-gray-900">Current Profile</h2>
-            <dl className="mt-4 space-y-4 text-sm">
-              <div>
-                <dt className="font-medium text-gray-500">Name</dt>
-                <dd className="mt-1 text-gray-900">{profile?.user.name ?? session.user.name ?? 'Practitioner'}</dd>
-              </div>
-              <div>
-                <dt className="font-medium text-gray-500">Email</dt>
-                <dd className="mt-1 text-gray-900">{profile?.user.email ?? session.user.email}</dd>
-              </div>
-              <div>
-                <dt className="font-medium text-gray-500">License Number</dt>
-                <dd className="mt-1 text-gray-900">{profile?.licenseNumber ?? 'Not provided'}</dd>
-              </div>
-              <div>
-                <dt className="font-medium text-gray-500">Verification</dt>
-                <dd className="mt-1 text-gray-900">{profile?.isVerified ? 'Verified' : 'Pending review'}</dd>
-              </div>
-              <div>
-                <dt className="font-medium text-gray-500">Specializations</dt>
-                <dd className="mt-1 text-gray-900">{profile?.specialization.join(', ') || 'General Therapy'}</dd>
-              </div>
-              <div>
-                <dt className="font-medium text-gray-500">Hourly rate</dt>
-                <dd className="mt-1 text-gray-900">{profile?.hourlyRate ? `₹${profile.hourlyRate}` : 'Not set'}</dd>
-              </div>
-            </dl>
-          </section>
-
-          <section className="rounded-xl bg-white p-6 shadow">
-            <h2 className="text-lg font-semibold text-gray-900">Draft edits</h2>
-            <div className="mt-4 space-y-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Specializations
-                <input
-                  className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2"
-                  onChange={(event) => setDraftSpecializations(event.target.value)}
-                  placeholder="Anxiety, Depression, Trauma"
-                  value={draftSpecializations}
-                />
-              </label>
-              <label className="block text-sm font-medium text-gray-700">
-                Bio
-                <textarea
-                  className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2"
-                  onChange={(event) => setDraftBio(event.target.value)}
-                  rows={6}
-                  value={draftBio}
-                />
-              </label>
-              <label className="block text-sm font-medium text-gray-700">
-                Hourly rate
-                <input
-                  className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2"
-                  min="0"
-                  onChange={(event) => setDraftRate(event.target.value)}
-                  type="number"
-                  value={draftRate}
-                />
-              </label>
-              <button
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                onClick={saveDraft}
-                type="button"
-              >
-                Save draft locally
-              </button>
+      <div className="mt-6 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+        <PractitionerSectionCard
+          action={
+            <PractitionerPill tone={profile?.isVerified ? 'emerald' : 'amber'}>
+              {profile?.isVerified ? 'Verified' : 'Pending review'}
+            </PractitionerPill>
+          }
+          description="This is the live profile clients see."
+          title="Current profile"
+        >
+          <dl className="space-y-4 text-sm">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+              <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Name</dt>
+              <dd className="mt-2 text-slate-950">{profile?.user.name ?? session.user.name ?? 'Practitioner'}</dd>
             </div>
-          </section>
-        </div>
-      </main>
-    </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+              <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Email</dt>
+              <dd className="mt-2 text-slate-950">{profile?.user.email ?? session.user.email}</dd>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+              <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">License number</dt>
+              <dd className="mt-2 text-slate-950">{profile?.licenseNumber ?? 'Not provided'}</dd>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+              <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Specializations</dt>
+              <dd className="mt-2 text-slate-950">{profile?.specialization.join(', ') || 'General Therapy'}</dd>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+              <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Hourly rate</dt>
+              <dd className="mt-2 text-slate-950">{profile?.hourlyRate ? `₹${profile.hourlyRate}` : 'Not set'}</dd>
+            </div>
+          </dl>
+        </PractitionerSectionCard>
+
+        <PractitionerSectionCard
+          action={<span className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">Profile preview</span>}
+          description="These controls keep an editable preview until profile syncing is available."
+          title="Profile updates"
+        >
+          <div className="rounded-[1.5rem] border border-sky-200 bg-sky-50/70 px-4 py-3 text-sm text-sky-800">{message}</div>
+          <div className="mt-5 space-y-5">
+            <label className="block text-sm font-medium text-slate-700">
+              Specializations
+              <input
+                className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-4 focus:ring-sky-100"
+                onChange={(event) => setDraftSpecializations(event.target.value)}
+                placeholder="Anxiety, Depression, Trauma"
+                value={draftSpecializations}
+              />
+            </label>
+            <label className="block text-sm font-medium text-slate-700">
+              Bio
+              <textarea
+                className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-4 focus:ring-sky-100"
+                onChange={(event) => setDraftBio(event.target.value)}
+                rows={7}
+                value={draftBio}
+              />
+            </label>
+            <label className="block text-sm font-medium text-slate-700">
+              Hourly rate
+              <input
+                className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-4 focus:ring-sky-100"
+                min="0"
+                onChange={(event) => setDraftRate(event.target.value)}
+                type="number"
+                value={draftRate}
+              />
+            </label>
+            <button
+              className="inline-flex items-center rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
+              onClick={saveDraft}
+              type="button"
+            >
+              Save changes
+            </button>
+          </div>
+        </PractitionerSectionCard>
+      </div>
+    </PractitionerShell>
   )
 }

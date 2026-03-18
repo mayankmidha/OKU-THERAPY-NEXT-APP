@@ -4,6 +4,14 @@ import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import {
+  PractitionerActionTile,
+  PractitionerLoadingState,
+  PractitionerPill,
+  PractitionerSectionCard,
+  PractitionerShell,
+  PractitionerStatCard,
+} from '@/components/practitioner-shell/practitioner-shell'
 
 type PractitionerAppointment = {
   id: string
@@ -62,14 +70,7 @@ export default function PractitionerDashboard() {
   }, [router, session, status])
 
   if (status === 'loading' || isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-green-600" />
-          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
-        </div>
-      </div>
-    )
+    return <PractitionerLoadingState message="Loading your dashboard..." />
   }
 
   if (!session || session.user.role !== 'PRACTITIONER') {
@@ -77,126 +78,164 @@ export default function PractitionerDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b bg-white shadow-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <h1 className="text-xl font-semibold text-gray-900">OKU Therapy - Practitioner</h1>
-          <div className="flex items-center gap-4">
-            <Link className="font-medium text-blue-600 hover:text-blue-800" href="/practitioner/appointments">
-              Appointments
-            </Link>
-            <Link className="font-medium text-blue-600 hover:text-blue-800" href="/practitioner/clients">
-              Clients
-            </Link>
-            <Link className="font-medium text-blue-600 hover:text-blue-800" href="/practitioner/availability">
-              Availability
-            </Link>
-            <button
-              className="text-sm text-gray-700 hover:text-gray-900"
-              onClick={() => void signOut({ callbackUrl: '/auth/login' })}
-              type="button"
-            >
-              Sign out
-            </button>
-          </div>
-        </div>
-      </header>
+    <PractitionerShell
+      badge="Practice command center"
+      currentPath="/practitioner/dashboard"
+      description={`A calm workspace for ${session.user.name ?? 'your practice'} with today's schedule, caseload, and quick actions in one place.`}
+      headerActions={
+        <button
+          className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-950"
+          onClick={() => void signOut({ callbackUrl: '/auth/login' })}
+          type="button"
+        >
+          Sign out
+        </button>
+      }
+      heroActions={
+        <>
+          <Link
+            className="inline-flex items-center rounded-full bg-slate-950 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
+            href="/practitioner/appointments"
+          >
+            View appointments
+          </Link>
+          <Link
+            className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-950"
+            href="/practitioner/availability"
+          >
+            Manage availability
+          </Link>
+        </>
+      }
+      title={`Welcome back, ${session.user.name ?? 'Practitioner'}`}
+    >
+      <div className="mb-6 flex flex-wrap gap-2">
+        <PractitionerPill tone="emerald">Verified practice</PractitionerPill>
+        <PractitionerPill tone="sky">{todaysAppointments.length} appointment{todaysAppointments.length === 1 ? '' : 's'} today</PractitionerPill>
+        <PractitionerPill tone="slate">{weekStats.clients} active clients</PractitionerPill>
+      </div>
 
-      <main className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
-        <div className="mb-8 rounded-lg bg-gradient-to-r from-green-600 to-teal-600 p-8 text-white">
-          <h2 className="mb-2 text-3xl font-bold">Today&apos;s Schedule</h2>
-          <p className="text-green-100">
-            You have {todaysAppointments.length} appointment{todaysAppointments.length === 1 ? '' : 's'} today.
-          </p>
-        </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <PractitionerStatCard
+          accent="from-sky-500 to-cyan-500"
+          detail="Appointments scheduled for today."
+          label="Today's appointments"
+          value={todaysAppointments.length}
+        />
+        <PractitionerStatCard
+          accent="from-emerald-500 to-teal-500"
+          detail="Practice flow over the current week."
+          label="This week"
+          value={weekStats.appointments}
+        />
+        <PractitionerStatCard
+          accent="from-violet-500 to-indigo-500"
+          detail="Clients currently in your caseload."
+          label="Active clients"
+          value={weekStats.clients}
+        />
+        <PractitionerStatCard
+          accent="from-amber-500 to-orange-500"
+          detail="Completed sessions this week."
+          label="Completed"
+          value={weekStats.completed}
+        />
+      </div>
 
-        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
-          <div className="rounded-lg bg-white p-6 shadow">
-            <p className="text-sm font-medium text-gray-500">Today&apos;s Appointments</p>
-            <p className="mt-2 text-3xl font-semibold text-gray-900">{todaysAppointments.length}</p>
-          </div>
-          <div className="rounded-lg bg-white p-6 shadow">
-            <p className="text-sm font-medium text-gray-500">This Week</p>
-            <p className="mt-2 text-3xl font-semibold text-gray-900">{weekStats.appointments}</p>
-          </div>
-          <div className="rounded-lg bg-white p-6 shadow">
-            <p className="text-sm font-medium text-gray-500">Active Clients</p>
-            <p className="mt-2 text-3xl font-semibold text-gray-900">{weekStats.clients}</p>
-          </div>
-          <div className="rounded-lg bg-white p-6 shadow">
-            <p className="text-sm font-medium text-gray-500">Completed This Week</p>
-            <p className="mt-2 text-3xl font-semibold text-gray-900">{weekStats.completed}</p>
-          </div>
-        </div>
-
-        <section className="mb-8 rounded-lg bg-white p-6 shadow">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900">Today&apos;s Appointments</h3>
-            <Link className="text-sm font-medium text-blue-600 hover:text-blue-800" href="/practitioner/appointments">
+      <div className="mt-6 grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
+        <PractitionerSectionCard
+          action={
+            <Link className="text-sm font-medium text-sky-700 transition hover:text-sky-900" href="/practitioner/appointments">
               View calendar
             </Link>
-          </div>
-
+          }
+          description="Today's appointments are surfaced here with time, client context, and note previews."
+          title="Today's schedule"
+        >
           {todaysAppointments.length > 0 ? (
             <div className="space-y-4">
               {todaysAppointments.map((appointment) => (
-                <div className="rounded-lg border border-gray-200 p-4" key={appointment.id}>
-                  <h4 className="font-medium text-gray-900">{appointment.client.name ?? 'Client'}</h4>
-                  <p className="text-sm text-gray-600">{appointment.client.email}</p>
-                  <p className="text-sm text-gray-600">
-                    {new Date(appointment.startTime).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}{' '}
-                    -{' '}
-                    {new Date(appointment.endTime).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
-                  {appointment.notes ? <p className="mt-2 text-sm text-gray-500">{appointment.notes}</p> : null}
-                </div>
+                <article
+                  className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/80 p-4 transition hover:border-slate-300 hover:bg-white"
+                  key={appointment.id}
+                >
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <h3 className="text-base font-semibold text-slate-950">{appointment.client.name ?? 'Client'}</h3>
+                        <p className="mt-1 text-sm text-slate-500">{appointment.client.email}</p>
+                      </div>
+                    <PractitionerPill tone="emerald">Scheduled</PractitionerPill>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2 text-sm text-slate-600">
+                    <span className="rounded-full bg-white px-3 py-1 ring-1 ring-slate-200">
+                      {new Date(appointment.startTime).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                      {' - '}
+                      {new Date(appointment.endTime).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
+
+                  {appointment.notes ? <p className="mt-3 text-sm leading-6 text-slate-600">{appointment.notes}</p> : null}
+                </article>
               ))}
             </div>
           ) : (
-            <div className="py-8 text-center text-gray-600">No appointments scheduled for today.</div>
+            <div className="rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50/70 px-6 py-10 text-center">
+              <p className="text-base font-medium text-slate-900">No appointments scheduled for today.</p>
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                Your calendar is clear, so this is a good time to update availability or review client context.
+              </p>
+            </div>
           )}
-        </section>
+        </PractitionerSectionCard>
 
-        <section className="rounded-lg bg-white p-6 shadow">
-          <h3 className="mb-4 text-lg font-medium text-gray-900">Quick Actions</h3>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Link
-              className="block rounded-lg border-2 border-gray-300 p-6 text-center transition hover:border-blue-500"
+        <PractitionerSectionCard
+          action={
+            <Link className="text-sm font-medium text-sky-700 transition hover:text-sky-900" href="/practitioner/profile">
+              Open profile
+            </Link>
+          }
+          description="Fast access to the parts of the workspace you use most during a live day."
+          title="Quick actions"
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <PractitionerActionTile
+              accent="from-sky-500 to-cyan-500"
+              description="Open your live schedule and review the day's flow."
               href="/practitioner/appointments"
-            >
-              <div className="mb-2 text-3xl">📅</div>
-              <div className="text-sm font-medium">Calendar</div>
-            </Link>
-            <Link
-              className="block rounded-lg border-2 border-gray-300 p-6 text-center transition hover:border-blue-500"
+              icon="A"
+              title="Appointments"
+            />
+            <PractitionerActionTile
+              accent="from-emerald-500 to-teal-500"
+              description="See the people already in your care and their context."
               href="/practitioner/clients"
-            >
-              <div className="mb-2 text-3xl">👥</div>
-              <div className="text-sm font-medium">My Clients</div>
-            </Link>
-            <Link
-              className="block rounded-lg border-2 border-gray-300 p-6 text-center transition hover:border-blue-500"
+              icon="C"
+              title="Clients"
+            />
+            <PractitionerActionTile
+              accent="from-violet-500 to-indigo-500"
+              description="Adjust working hours and weekly availability."
               href="/practitioner/availability"
-            >
-              <div className="mb-2 text-3xl">⏰</div>
-              <div className="text-sm font-medium">Availability</div>
-            </Link>
-            <Link
-              className="block rounded-lg border-2 border-gray-300 p-6 text-center transition hover:border-blue-500"
+              icon="V"
+              title="Availability"
+            />
+            <PractitionerActionTile
+              accent="from-amber-500 to-orange-500"
+              description="Review your verified profile and update details."
               href="/practitioner/profile"
-            >
-              <div className="mb-2 text-3xl">👤</div>
-              <div className="text-sm font-medium">Profile</div>
-            </Link>
+              icon="P"
+              title="Profile"
+            />
           </div>
-        </section>
-      </main>
-    </div>
+        </PractitionerSectionCard>
+      </div>
+    </PractitionerShell>
   )
 }

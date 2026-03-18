@@ -1,9 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
+import { useEffect, useState } from 'react'
+import {
+  PractitionerLoadingState,
+  PractitionerPill,
+  PractitionerSectionCard,
+  PractitionerShell,
+  PractitionerStatCard,
+} from '@/components/practitioner-shell/practitioner-shell'
 
 type AppointmentSummary = {
   endTime: string
@@ -71,14 +78,7 @@ export default function PractitionerAppointmentsPage() {
   }, [router, session, status])
 
   if (status === 'loading' || isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-green-600" />
-          <p className="mt-4 text-gray-600">Loading appointments...</p>
-        </div>
-      </div>
-    )
+    return <PractitionerLoadingState message="Loading appointments..." />
   }
 
   if (!session || session.user.role !== 'PRACTITIONER') {
@@ -86,80 +86,112 @@ export default function PractitionerAppointmentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b bg-white shadow-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link className="font-medium text-blue-600 hover:text-blue-800" href="/practitioner/dashboard">
-            ← Back to Dashboard
+    <PractitionerShell
+      badge="Schedule"
+      currentPath="/practitioner/appointments"
+      description="Review today's calendar, weekly flow, and client context in a calmer, premium workspace."
+      headerActions={
+        <button
+          className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-950"
+          onClick={() => void signOut({ callbackUrl: '/auth/login' })}
+          type="button"
+        >
+          Sign out
+        </button>
+      }
+      heroActions={
+        <>
+          <Link
+            className="inline-flex items-center rounded-full bg-slate-950 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
+            href="/practitioner/dashboard"
+          >
+            Back to dashboard
           </Link>
-          <button className="text-sm text-gray-700 hover:text-gray-900" onClick={() => void signOut({ callbackUrl: '/auth/login' })} type="button">
-            Sign out
-          </button>
-        </div>
-      </header>
+          <Link
+            className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-950"
+            href="/practitioner/clients"
+          >
+            View clients
+          </Link>
+        </>
+      }
+      title="Appointments"
+    >
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <PractitionerStatCard
+          accent="from-sky-500 to-cyan-500"
+          detail="Appointments scheduled for today."
+          label="Today's appointments"
+          value={appointments.length}
+        />
+        <PractitionerStatCard
+          accent="from-emerald-500 to-teal-500"
+          detail="Total appointments captured this week."
+          label="This week"
+          value={stats.appointments}
+        />
+        <PractitionerStatCard
+          accent="from-amber-500 to-orange-500"
+          detail="Completed appointments this week."
+          label="Completed"
+          value={stats.completed}
+        />
+      </div>
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
-          <p className="mt-2 text-sm text-gray-600">Today&apos;s schedule and this week&apos;s practice summary.</p>
-        </div>
-
-        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-          <div className="rounded-xl bg-white p-6 shadow">
-            <div className="text-sm font-medium text-gray-500">Today&apos;s appointments</div>
-            <div className="mt-2 text-3xl font-semibold text-gray-900">{appointments.length}</div>
-          </div>
-          <div className="rounded-xl bg-white p-6 shadow">
-            <div className="text-sm font-medium text-gray-500">This week</div>
-            <div className="mt-2 text-3xl font-semibold text-gray-900">{stats.appointments}</div>
-          </div>
-          <div className="rounded-xl bg-white p-6 shadow">
-            <div className="text-sm font-medium text-gray-500">Completed this week</div>
-            <div className="mt-2 text-3xl font-semibold text-gray-900">{stats.completed}</div>
-          </div>
-        </div>
-
-        <section className="rounded-xl bg-white p-6 shadow">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Today</h2>
-            <Link className="text-sm font-medium text-blue-600 hover:text-blue-800" href="/practitioner/clients">
+      <div className="mt-6">
+        <PractitionerSectionCard
+          action={
+            <Link className="text-sm font-medium text-sky-700 transition hover:text-sky-900" href="/practitioner/clients">
               View clients
             </Link>
-          </div>
-
+          }
+          description="Today's sessions are shown here with time, client context, and note previews."
+          title="Today's calendar"
+        >
           {appointments.length > 0 ? (
             <div className="space-y-4">
               {appointments.map((appointment) => (
-                <div className="rounded-lg border border-gray-200 p-4" key={appointment.id}>
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <article
+                  className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/80 p-4 transition hover:border-slate-300 hover:bg-white"
+                  key={appointment.id}
+                >
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <div className="font-medium text-gray-900">{appointment.client.name ?? 'Client'}</div>
-                      <div className="mt-1 text-sm text-gray-600">{appointment.client.email}</div>
-                      <div className="mt-1 text-sm text-gray-600">
-                        {new Date(appointment.startTime).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}{' '}
-                        -{' '}
-                        {new Date(appointment.endTime).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
+                      <div className="text-base font-semibold text-slate-950">{appointment.client.name ?? 'Client'}</div>
+                      <div className="mt-1 text-sm text-slate-500">{appointment.client.email}</div>
+                      <div className="mt-3 flex flex-wrap gap-2 text-sm text-slate-600">
+                        <span className="rounded-full bg-white px-3 py-1 ring-1 ring-slate-200">
+                          {new Date(appointment.startTime).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                          {' - '}
+                          {new Date(appointment.endTime).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                        <span className="rounded-full bg-white px-3 py-1 ring-1 ring-slate-200">
+                          {new Date(appointment.startTime).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
-                    <div className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
-                      Scheduled
-                    </div>
+                    <PractitionerPill tone="emerald">Scheduled</PractitionerPill>
                   </div>
-                  {appointment.notes ? <p className="mt-3 text-sm text-gray-500">{appointment.notes}</p> : null}
-                </div>
+                  {appointment.notes ? <p className="mt-3 text-sm leading-6 text-slate-600">{appointment.notes}</p> : null}
+                </article>
               ))}
             </div>
           ) : (
-            <div className="py-8 text-center text-sm text-gray-600">No appointments scheduled for today.</div>
+            <div className="rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50/70 px-6 py-10 text-center">
+              <p className="text-base font-medium text-slate-900">No appointments scheduled for today.</p>
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                The day is open, which makes it a good time to review availability or client notes.
+              </p>
+            </div>
           )}
-        </section>
-      </main>
-    </div>
+        </PractitionerSectionCard>
+      </div>
+    </PractitionerShell>
   )
 }

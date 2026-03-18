@@ -1,12 +1,18 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+
+import { BrandAuthShell } from '@/components/brand-auth-shell'
 
 const roles = [
-  { label: 'Client', value: 'CLIENT' },
-  { label: 'Practitioner', value: 'PRACTITIONER' },
+  { label: 'Client', value: 'CLIENT', description: 'Book sessions, complete assessments, and track your care journey.' },
+  {
+    label: 'Practitioner',
+    value: 'PRACTITIONER',
+    description: 'Create a professional account to manage appointments, clients, and availability.',
+  },
 ] as const
 
 export default function SignupPage() {
@@ -54,127 +60,135 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-blue-50 px-4 py-12">
-      <div className="mx-auto max-w-lg rounded-2xl bg-white p-8 shadow-xl">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Create your OKU Therapy account</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Choose your role, sign up, and we&apos;ll route you into the app.
-          </p>
+    <BrandAuthShell
+      description="Create your OKU Therapy access point and we will route you into the right workspace for care, practice, or platform management."
+      eyebrow="Signup"
+      footer={
+        <p>
+          Already have access?{' '}
+          <Link className="font-medium text-[#2f6a5b] transition hover:text-stone-900" href="/auth/login">
+            Sign in here
+          </Link>
+        </p>
+      }
+      title="Create your OKU account"
+    >
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-stone-500">Create access</p>
+        <h2 className="mt-3 font-serif text-3xl text-stone-950">Choose the role that fits how you use the platform.</h2>
+        <p className="mt-3 max-w-xl text-sm leading-7 text-stone-600">
+          Clients can start self-reflection and booking right away. Practitioner accounts can be created now and verified by admin after review.
+        </p>
+      </div>
+
+      <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+        {error ? (
+          <div className="rounded-[20px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {error}
+          </div>
+        ) : null}
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-stone-700" htmlFor="name">
+            Full name
+          </label>
+          <input
+            className="w-full rounded-[20px] border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 shadow-sm outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200"
+            id="name"
+            onChange={(event) => handleChange('name', event.target.value)}
+            placeholder="Aarav Sharma"
+            required
+            value={formData.name}
+          />
         </div>
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          {error ? (
-            <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
-            </div>
-          ) : null}
-
+        <div className="grid gap-5 md:grid-cols-2">
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="name">
-              Full name
-            </label>
-            <input
-              id="name"
-              required
-              value={formData.name}
-              onChange={(event) => handleChange('name', event.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Aarav Sharma"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="email">
+            <label className="mb-2 block text-sm font-medium text-stone-700" htmlFor="email">
               Email
             </label>
             <input
+              className="w-full rounded-[20px] border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 shadow-sm outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200"
               id="email"
-              type="email"
-              required
-              value={formData.email}
               onChange={(event) => handleChange('email', event.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="name@example.com"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="password">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              minLength={6}
               required
-              value={formData.password}
-              onChange={(event) => handleChange('password', event.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Minimum 6 characters"
+              type="email"
+              value={formData.email}
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="phone">
+            <label className="mb-2 block text-sm font-medium text-stone-700" htmlFor="phone">
               Phone
             </label>
             <input
+              className="w-full rounded-[20px] border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 shadow-sm outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200"
               id="phone"
-              value={formData.phone}
               onChange={(event) => handleChange('phone', event.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="+91 98765 43210"
+              value={formData.phone}
             />
           </div>
+        </div>
 
-          <fieldset>
-            <legend className="mb-2 block text-sm font-medium text-gray-700">Role</legend>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {roles.map((role) => (
+        <div>
+          <label className="mb-2 block text-sm font-medium text-stone-700" htmlFor="password">
+            Password
+          </label>
+          <input
+            className="w-full rounded-[20px] border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 shadow-sm outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200"
+            id="password"
+            minLength={6}
+            onChange={(event) => handleChange('password', event.target.value)}
+            placeholder="Minimum 6 characters"
+            required
+            type="password"
+            value={formData.password}
+          />
+        </div>
+
+        <fieldset>
+          <legend className="mb-3 block text-sm font-medium text-stone-700">Choose your role</legend>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {roles.map((role) => {
+              const isSelected = formData.role === role.value
+
+              return (
                 <label
-                  key={role.value}
-                  className={`rounded-xl border p-4 text-sm transition ${
-                    formData.role === role.value
-                      ? 'border-blue-600 bg-blue-50 text-blue-900'
-                      : 'border-gray-200 bg-white text-gray-700'
+                  className={`rounded-[24px] border p-5 transition ${
+                    isSelected
+                      ? 'border-stone-900 bg-stone-950 text-stone-50 shadow-[0_14px_40px_rgba(20,16,12,0.18)]'
+                      : 'border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50'
                   }`}
+                  key={role.value}
                 >
                   <input
-                    checked={formData.role === role.value}
+                    checked={isSelected}
                     className="sr-only"
                     name="role"
                     onChange={() => handleChange('role', role.value)}
                     type="radio"
                     value={role.value}
                   />
-                  <span className="block font-medium">{role.label}</span>
-                  <span className="mt-1 block text-xs text-gray-500">
-                    {role.value === 'CLIENT'
-                      ? 'Book sessions, track mood, and complete assessments.'
-                      : 'Create a professional account pending admin verification.'}
+                  <span className="block text-base font-semibold">{role.label}</span>
+                  <span className={`mt-2 block text-sm leading-6 ${isSelected ? 'text-stone-300' : 'text-stone-600'}`}>
+                    {role.description}
                   </span>
                 </label>
-              ))}
-            </div>
-          </fieldset>
+              )
+            })}
+          </div>
+        </fieldset>
 
-          <button
-            className="w-full rounded-md bg-blue-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={isLoading}
-            type="submit"
-          >
-            {isLoading ? 'Creating account...' : 'Create account'}
-          </button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Already have an account?{' '}
-          <Link className="font-medium text-blue-600 hover:text-blue-500" href="/auth/login">
-            Sign in
-          </Link>
-        </p>
-      </div>
-    </div>
+        <button
+          className="w-full rounded-full bg-[#2f6a5b] px-5 py-3 text-sm font-medium text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={isLoading}
+          type="submit"
+        >
+          {isLoading ? 'Creating account...' : formData.role === 'CLIENT' ? 'Start as a client' : 'Apply as a practitioner'}
+        </button>
+      </form>
+    </BrandAuthShell>
   )
 }

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
+import { AdminActionLink, AdminMetricCard, AdminPanel, AdminShell, AdminStatusPill } from '@/components/admin-shell'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
@@ -13,6 +14,16 @@ type AdminUserRow = {
     isVerified: boolean
   } | null
   role: 'ADMIN' | 'CLIENT' | 'PRACTITIONER'
+}
+
+function getUserStatus(user: AdminUserRow) {
+  if (user.role !== 'PRACTITIONER') {
+    return { label: 'Active client', tone: 'info' as const }
+  }
+
+  return user.practitionerProfile?.isVerified
+    ? { label: 'Verified practitioner', tone: 'success' as const }
+    : { label: 'Pending verification', tone: 'warning' as const }
 }
 
 export default async function AdminUsersPage() {
@@ -40,6 +51,8 @@ export default async function AdminUsersPage() {
     },
   })) as AdminUserRow[]
 
+  const totalClients = users.filter((user) => user.role === 'CLIENT').length
+  const totalPractitioners = users.filter((user) => user.role === 'PRACTITIONER').length
   const verifiedPractitioners = users.filter(
     (user) => user.role === 'PRACTITIONER' && user.practitionerProfile?.isVerified
   ).length
@@ -48,93 +61,132 @@ export default async function AdminUsersPage() {
   ).length
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b bg-white shadow-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">Admin Users</h1>
-            <p className="text-sm text-gray-500">Browse users and check practitioner verification status.</p>
-          </div>
-          <Link className="text-sm font-medium text-blue-600 hover:text-blue-800" href="/admin/dashboard">
-            Back to dashboard
-          </Link>
-        </div>
-      </header>
+    <AdminShell
+      actions={
+        <AdminActionLink href="/admin/dashboard" kind="secondary">
+          Back to dashboard
+        </AdminActionLink>
+      }
+      description="Browse accounts, see verification status, and open any profile."
+      title="User directory"
+    >
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <AdminMetricCard hint="All accounts" label="Total users" tone="sky" value={users.length} />
+        <AdminMetricCard hint="Client accounts" label="Clients" tone="emerald" value={totalClients} />
+        <AdminMetricCard hint="Practitioner accounts" label="Practitioners" tone="violet" value={totalPractitioners} />
+        <AdminMetricCard hint="Approved for bookings" label="Verified" tone="emerald" value={verifiedPractitioners} />
+      </div>
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-6 grid gap-4 md:grid-cols-3">
-          <div className="rounded-xl bg-white p-5 shadow">
-            <p className="text-sm text-gray-500">Total users</p>
-            <p className="mt-2 text-3xl font-semibold text-gray-900">{users.length}</p>
+      <div className="mt-6 grid gap-6 xl:grid-cols-[1.7fr_1fr]">
+        <AdminPanel className="overflow-hidden" tone="light">
+          <div className="flex flex-col gap-3 border-b border-slate-100 px-6 py-5 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">User list</p>
+              <h2 className="mt-2 text-lg font-semibold text-slate-950">All accounts</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                The list stays compact so the admin team can quickly find who joined, who is verified, and who still needs review.
+              </p>
+            </div>
+            <AdminStatusPill tone={pendingPractitioners ? 'warning' : 'success'}>
+              {pendingPractitioners ? `${pendingPractitioners} pending` : 'All practitioners verified'}
+            </AdminStatusPill>
           </div>
-          <div className="rounded-xl bg-white p-5 shadow">
-            <p className="text-sm text-gray-500">Verified practitioners</p>
-            <p className="mt-2 text-3xl font-semibold text-gray-900">{verifiedPractitioners}</p>
-          </div>
-          <div className="rounded-xl bg-white p-5 shadow">
-            <p className="text-sm text-gray-500">Pending practitioners</p>
-            <p className="mt-2 text-3xl font-semibold text-gray-900">{pendingPractitioners}</p>
-          </div>
-        </div>
 
-        <div className="overflow-hidden rounded-xl bg-white shadow">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Role
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Joined
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {users.map((user) => {
-                const isPractitioner = user.role === 'PRACTITIONER'
-                const isVerified = user.practitionerProfile?.isVerified ?? true
-
-                return (
-                  <tr key={user.id}>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{user.name ?? 'Unnamed User'}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{user.role}</td>
-                    <td className="px-6 py-4 text-sm">
-                      <span
-                        className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                          isPractitioner
-                            ? isVerified
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-yellow-100 text-yellow-800'
-                            : 'bg-blue-100 text-blue-800'
-                        }`}
-                      >
-                        {isPractitioner ? (isVerified ? 'Verified' : 'Pending') : 'Active'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {user.createdAt.toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium">
-                      <Link className="text-blue-600 hover:text-blue-800" href={`/admin/users/${user.id}`}>
-                        View
-                      </Link>
-                    </td>
+          {users.length ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-slate-100">
+                <thead className="bg-slate-50/80">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">User</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Role</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Joined</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Actions</th>
                   </tr>
-                )
-              })}
-            </tbody>
-          </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {users.map((user) => {
+                    const statusPill = getUserStatus(user)
+                    const initials =
+                      user.name
+                        ?.split(' ')
+                        .slice(0, 2)
+                        .map((part) => part.charAt(0).toUpperCase())
+                        .join('')
+                        .slice(0, 2) ?? 'U'
+
+                    return (
+                      <tr key={user.id} className="transition hover:bg-slate-50/80">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-sm font-semibold text-white shadow-sm">
+                              {initials}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-slate-950">{user.name ?? 'Unnamed user'}</p>
+                              <p className="text-sm text-slate-500">{user.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <AdminStatusPill tone={user.role === 'PRACTITIONER' ? 'warning' : user.role === 'ADMIN' ? 'neutral' : 'info'}>
+                            {user.role}
+                          </AdminStatusPill>
+                        </td>
+                        <td className="px-6 py-4">
+                          <AdminStatusPill tone={statusPill.tone}>{statusPill.label}</AdminStatusPill>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600">
+                          {user.createdAt.toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </td>
+                        <td className="px-6 py-4">
+                          <Link className="text-sm font-medium text-sky-700 transition hover:text-sky-800" href={`/admin/users/${user.id}`}>
+                            View details
+                          </Link>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="px-6 py-12 text-center">
+              <p className="text-base font-medium text-slate-950">No users yet</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">New clients and practitioners will appear here automatically.</p>
+            </div>
+          )}
+        </AdminPanel>
+
+        <div className="space-y-6">
+          <AdminPanel className="p-6" tone="light">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Operational note</p>
+            <h2 className="mt-2 text-lg font-semibold text-slate-950">Verification workflow</h2>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              Practitioner review stays simple in Phase 1. This directory gives the team a quick audit trail and direct access to
+              each account.
+            </p>
+          </AdminPanel>
+
+          <AdminPanel className="p-6" tone="dark">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-200/80">Verification balance</p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-sm text-slate-300">Verified</p>
+                <p className="mt-2 text-2xl font-semibold text-white">{verifiedPractitioners}</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-sm text-slate-300">Pending</p>
+                <p className="mt-2 text-2xl font-semibold text-white">{pendingPractitioners}</p>
+              </div>
+            </div>
+          </AdminPanel>
         </div>
-      </main>
-    </div>
+      </div>
+    </AdminShell>
   )
 }

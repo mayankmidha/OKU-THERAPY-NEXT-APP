@@ -1,14 +1,15 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
+
+import { BrandAuthShell } from '@/components/brand-auth-shell'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
@@ -28,7 +29,7 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        setError('Invalid credentials')
+        setError('We could not match those credentials. Please try again.')
         return
       }
 
@@ -58,111 +59,104 @@ export default function LoginPage() {
 
       router.refresh()
     } catch {
-      setError('An error occurred. Please try again.')
+      setError('An unexpected error occurred. Please try again.')
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="mx-auto flex min-h-screen max-w-md items-center">
-        <div className="w-full space-y-8">
-          <div className="text-center">
-            <h1 className="mb-2 text-4xl font-bold text-gray-900">OKU Therapy</h1>
-            <p className="text-gray-600">Welcome back. Sign in to continue.</p>
+    <BrandAuthShell
+      description="Return to your secure OKU Therapy workspace to review appointments, assessments, and the next steps in care."
+      eyebrow="Login"
+      footer={
+        <p>
+          Don&apos;t have an account yet?{' '}
+          <Link className="font-medium text-[#2f6a5b] transition hover:text-stone-900" href="/auth/signup">
+            Create one here
+          </Link>
+        </p>
+      }
+      title="Continue to your care space"
+    >
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-stone-500">Private access</p>
+        <h2 className="mt-3 font-serif text-3xl text-stone-950">Sign in calmly, pick up where you left off.</h2>
+        <p className="mt-3 max-w-xl text-sm leading-7 text-stone-600">
+          Clients, practitioners, and admins are routed into the right workspace after sign-in.
+        </p>
+      </div>
+
+      <div className="mt-8 space-y-4">
+        {message ? (
+          <div className="rounded-[20px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            {message}
           </div>
+        ) : null}
 
-          <div className="rounded-lg bg-white p-8 shadow-xl">
-            {message ? (
-              <div className="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-green-700">
-                {message}
-              </div>
-            ) : null}
-
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              {error ? (
-                <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-red-700">
-                  {error}
-                </div>
-              ) : null}
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="email">
-                  Email address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="john@example.com"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="password">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <label className="flex items-center text-sm text-gray-700">
-                  <input
-                    checked={rememberMe}
-                    onChange={(event) => setRememberMe(event.target.checked)}
-                    className="mr-2 rounded text-blue-600 focus:ring-blue-500"
-                    type="checkbox"
-                  />
-                  Remember me
-                </label>
-                <span className="text-sm text-gray-500">Password reset coming soon</span>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex w-full justify-center rounded-md bg-blue-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isLoading ? 'Signing in...' : 'Sign in'}
-              </button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                Don&apos;t have an account?{' '}
-                <Link className="font-medium text-blue-600 hover:text-blue-500" href="/auth/signup">
-                  Sign up
-                </Link>
-              </p>
-            </div>
+        {error ? (
+          <div className="rounded-[20px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {error}
           </div>
+        ) : null}
+      </div>
 
-          <div className="rounded-lg bg-white/90 p-4 text-center">
-            <p className="mb-2 text-xs text-gray-600">Demo credentials</p>
-            <p className="rounded bg-gray-100 p-2 font-mono text-xs">Client: client@demo.com / demo123</p>
-            <p className="mt-1 rounded bg-gray-100 p-2 font-mono text-xs">
-              Practitioner: practitioner@demo.com / demo123
-            </p>
-            <p className="mt-1 rounded bg-gray-100 p-2 font-mono text-xs">Admin: admin@demo.com / demo123</p>
-          </div>
+      <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+        <div>
+          <label className="mb-2 block text-sm font-medium text-stone-700" htmlFor="email">
+            Email address
+          </label>
+          <input
+            autoComplete="email"
+            className="w-full rounded-[20px] border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 shadow-sm outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200"
+            id="email"
+            name="email"
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="you@example.com"
+            required
+            type="email"
+            value={email}
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-stone-700" htmlFor="password">
+            Password
+          </label>
+          <input
+            autoComplete="current-password"
+            className="w-full rounded-[20px] border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 shadow-sm outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200"
+            id="password"
+            name="password"
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Enter your password"
+            required
+            type="password"
+            value={password}
+          />
+        </div>
+
+        <div className="rounded-[24px] border border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-600">
+          Password reset is not yet live in the MVP, so use one of the seeded accounts while testing preview environments.
+        </div>
+
+        <button
+          className="w-full rounded-full bg-[#2f6a5b] px-5 py-3 text-sm font-medium text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={isLoading}
+          type="submit"
+        >
+          {isLoading ? 'Signing in...' : 'Continue to workspace'}
+        </button>
+      </form>
+
+      <div className="mt-8 rounded-[24px] border border-stone-200 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(247,243,236,0.98))] p-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">Demo access</p>
+        <div className="mt-4 space-y-2 font-mono text-xs text-stone-700">
+          <p>client@demo.com / demo123</p>
+          <p>practitioner@demo.com / demo123</p>
+          <p>admin@demo.com / demo123</p>
         </div>
       </div>
-    </div>
+    </BrandAuthShell>
   )
 }
