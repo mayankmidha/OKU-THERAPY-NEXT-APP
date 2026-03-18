@@ -31,7 +31,29 @@ export default function LoginPage() {
       })
 
       if (response.ok) {
-        router.push('/dashboard')
+        // Get user role to redirect to correct dashboard
+        const userResponse = await fetch('/api/auth/user')
+        if (userResponse.ok) {
+          const userData = await userResponse.json()
+          const role = userData.user.role
+          
+          // Redirect based on role
+          switch (role) {
+            case 'CLIENT':
+              router.push('/client/dashboard')
+              break
+            case 'PRACTITIONER':
+              router.push('/practitioner/dashboard')
+              break
+            case 'ADMIN':
+              router.push('/admin/dashboard')
+              break
+            default:
+              router.push('/dashboard')
+          }
+        } else {
+          router.push('/dashboard')
+        }
         router.refresh()
       } else {
         const data = await response.json()
