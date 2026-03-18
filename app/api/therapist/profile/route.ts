@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { auth } from '../../../../lib/auth'
+import { prisma } from '../../../../lib/prisma'
 
 export async function GET() {
   try {
@@ -10,7 +10,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const therapistProfile = await prisma.therapistProfile.findUnique({
+    const therapistProfile = await prisma.practitionerProfile.findUnique({
       where: { userId: session.user.id },
       include: {
         user: {

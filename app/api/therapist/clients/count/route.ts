@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { auth } from '../../../../../lib/auth'
+import { prisma } from '../../../../../lib/prisma'
 
 export async function GET() {
   try {
@@ -10,9 +10,9 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const clientBookings = await prisma.booking.findMany({
+    const clientBookings = await prisma.appointment.findMany({
       where: {
-        therapistId: session.user.id,
+        practitionerId: session.user.id,
         status: {
           in: ['SCHEDULED', 'COMPLETED']
         }

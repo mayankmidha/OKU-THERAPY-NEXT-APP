@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
     const moodEntry = await prisma.moodEntry.create({
       data: {
-        clientId: session.user.id,
+        userId: session.user.id,
         mood: parseInt(mood),
         notes: notes || '',
         tags: tags || []

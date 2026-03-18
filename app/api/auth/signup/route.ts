@@ -1,15 +1,21 @@
 import { NextResponse } from 'next/server'
-import { NextRequest } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const { name, email, password, role } = await req.json()
+    const { name, email, password, role, phone } = await req.json()
 
-    if (!email || !password) {
+    if (!email || !password || !role) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        { error: 'Email, password, and role are required' },
+        { status: 400 }
+      )
+    }
+
+    if (password.length < 6) {
+      return NextResponse.json(
+        { error: 'Password must be at least 6 characters long' },
         { status: 400 }
       )
     }
@@ -21,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'User already exists' },
+        { error: 'User already exists with this email' },
         { status: 400 }
       )
     }
@@ -35,22 +41,23 @@ export async function POST(req: NextRequest) {
         name,
         email,
         password: hashedPassword,
-        role: role || 'CLIENT'
+        role: role.toUpperCase(),
+        phone: phone || null
       }
     })
 
-    // Create profile based on role
-    if (role === 'CLIENT') {
+    // Create role-specific profile
+    if (role.toUpperCase() === 'CLIENT') {
       await prisma.clientProfile.create({
         data: {
           userId: user.id
         }
       })
-    } else if (role === 'THERAPIST') {
-      await prisma.therapistProfile.create({
+    } else if (role.toUpperCase() === 'PRACTITIONER') {
+      await prisma.practitionerProfile.create({
         data: {
           userId: user.id,
-          isApproved: false // Requires admin approval
+          isVerified: false // Requires admin verification
         }
       })
     }

@@ -22,7 +22,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           },
           include: {
             clientProfile: true,
-            therapistProfile: true
+            practitionerProfile: true
           }
         })
 
@@ -43,7 +43,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role,
+          role: user.role
         }
       }
     })
@@ -67,6 +67,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }
   },
   pages: {
-    signIn: '/auth/signin'
+    signIn: '/auth/login'
   }
 })

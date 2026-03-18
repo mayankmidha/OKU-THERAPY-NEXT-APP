@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-export async function POST(req: Request) {
+export async function GET() {
   try {
     const session = await auth()
     
@@ -10,29 +10,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { type, responses, score, result, interpretation } = await req.json()
-
-    if (!type || !responses) {
-      return NextResponse.json(
-        { error: 'Type and responses are required' },
-        { status: 400 }
-      )
-    }
-
-    const assessment = await prisma.assessment.create({
-      data: {
-        clientId: session.user.id,
-        type,
-        responses,
-        score,
-        result,
-        interpretation
+    const assessmentAnswers = await prisma.assessmentAnswer.findMany({
+      where: {
+        userId: session.user.id
+      },
+      include: {
+        assessment: {
+          select: {
+            title: true,
+            description: true
+          }
+        }
+      },
+      orderBy: {
+        completedAt: 'desc'
       }
     })
 
-    return NextResponse.json(assessment)
+    return NextResponse.json(assessmentAnswers)
   } catch (error) {
-    console.error('Error creating assessment:', error)
+    console.error('Error fetching client assessments:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

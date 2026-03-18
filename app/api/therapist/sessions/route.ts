@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { auth } from '../../../../lib/auth'
+import { prisma } from '../../../../lib/prisma'
 
 export async function GET() {
   try {
@@ -10,11 +10,17 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const sessions = await prisma.booking.findMany({
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+
+    const sessions = await prisma.appointment.findMany({
       where: {
-        therapistId: session.user.id,
+        practitionerId: session.user.id,
         startTime: {
-          gte: new Date()
+          gte: today,
+          lt: tomorrow
         },
         status: 'SCHEDULED'
       },

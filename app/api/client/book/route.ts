@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { auth } from '../../../../lib/auth'
+import { prisma } from '../../../../lib/prisma'
 
 export async function GET() {
   try {
@@ -21,19 +21,20 @@ export async function GET() {
     })
 
     // Get approved therapists
-    const therapists = await prisma.therapistProfile.findMany({
+    const therapists = await prisma.user.findMany({
       where: {
-        isApproved: true,
-        user: {
-          role: 'THERAPIST'
+        role: 'PRACTITIONER',
+        practitionerProfile: {
+          isVerified: true
         }
       },
       include: {
-        user: {
+        practitionerProfile: {
           select: {
-            name: true,
-            email: true,
-            image: true
+            specialization: true,
+            bio: true,
+            hourlyRate: true,
+            licenseNumber: true
           }
         }
       }
@@ -78,26 +79,33 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Service not found' }, { status: 404 })
     }
 
-    // Calculate end time
+    // Calculate end time based on service duration
     const startDateTime = new Date(startTime)
     const endDateTime = new Date(startDateTime.getTime() + service.duration * 60000)
 
     // Create booking
-    const booking = await prisma.booking.create({
+    const booking = await prisma.appointment.create({
       data: {
         clientId: session.user.id,
-        therapistId,
-        serviceId,
+        practitionerId: therapistId,
+        serviceId: serviceId,
         startTime: startDateTime,
         endTime: endDateTime,
         notes: notes || '',
         status: 'SCHEDULED'
       },
       include: {
-        therapist: {
+        practitioner: {
           select: {
             name: true,
-            email: true
+            email: true,
+            practitionerProfile: {
+              select: {
+                specialization: true,
+                bio: true,
+                hourlyRate: true
+              }
+            }
           }
         },
         service: {

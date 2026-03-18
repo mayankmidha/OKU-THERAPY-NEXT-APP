@@ -12,7 +12,7 @@ export async function GET() {
 
     const moodEntry = await prisma.moodEntry.findFirst({
       where: {
-        clientId: session.user.id
+        userId: session.user.id
       },
       orderBy: {
         createdAt: 'desc'

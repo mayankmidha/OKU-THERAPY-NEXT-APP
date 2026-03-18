@@ -10,43 +10,37 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const sessions = await prisma.appointment.findMany({
+    const clients = await prisma.appointment.findMany({
       where: {
-        clientId: session.user.id,
-        startTime: {
-          gte: new Date()
-        },
-        status: 'SCHEDULED'
+        practitionerId: session.user.id,
+        status: {
+          in: ['SCHEDULED', 'COMPLETED']
+        }
       },
       include: {
-        practitioner: {
+        client: {
           select: {
             name: true,
             email: true,
-            practitionerProfile: {
+            clientProfile: {
               select: {
-                specialization: true,
-                hourlyRate: true
+                dateOfBirth: true,
+                gender: true,
+                medicalHistory: true
               }
             }
           }
-        },
-        service: {
-          select: {
-            name: true,
-            duration: true,
-            price: true
-          }
         }
       },
+      distinct: ['clientId'],
       orderBy: {
-        startTime: 'asc'
+        startTime: 'desc'
       }
     })
 
-    return NextResponse.json(sessions)
+    return NextResponse.json(clients)
   } catch (error) {
-    console.error('Error fetching client sessions:', error)
+    console.error('Error fetching practitioner clients:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

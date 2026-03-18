@@ -45,17 +45,21 @@ model User {
   image         String?
   role          UserRole  @default(CLIENT)
   password      String?   // For credentials auth
+  phone         String?
+  bio           String?   @db.Text
+  avatar        String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   accounts      Account[]
   sessions      Session[]
   clientProfile ClientProfile?
-  therapistProfile TherapistProfile?
-  clientBookings      Booking[] @relation("ClientBookings")
-  therapistBookings      Booking[] @relation("TherapistBookings")
-  assessments   Assessment[]
-  moodEntries   MoodEntry[]
+  practitionerProfile PractitionerProfile?
+  clientAppointments     Appointment[] @relation("ClientAppointments")
+  practitionerAppointments Appointment[] @relation("PractitionerAppointments")
+  payments      Payment[]
+  assessmentAnswers AssessmentAnswer[]
+  moodEntries    MoodEntry[]
 }
 
 model VerificationToken {
@@ -67,139 +71,144 @@ model VerificationToken {
 }
 
 model ClientProfile {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  dateOfBirth DateTime?
-  phone       String?
-  address     String?
-  emergencyContact String?
-  medicalHistory String? @db.Text
-  preferences Json?    // Store therapy preferences
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  dateOfBirth    DateTime?
+  gender        String?
+  medicalHistory String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bookings    Booking[] @relation("ClientProfileBookings")
-  assessments Assessment[] @relation("ClientAssessments")
-  moodEntries MoodEntry[] @relation("ClientMoodEntries")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments   Appointment[]
+  assessments    AssessmentAnswer[]
+  moodEntries    MoodEntry[]
 }
 
-model TherapistProfile {
+model PractitionerProfile {
   id              String   @id @default(cuid())
   userId          String   @unique
   licenseNumber   String?
   specialization String[]
-  experience      Int?     // years of experience
   bio             String?  @db.Text
-  education       String?  @db.Text
-  languages       String[]
-  consultationFee Float?
-  availability    Json?    // Store availability schedule
-  isApproved      Boolean  @default(false)
+  hourlyRate      Float?
+  isVerified      Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bookings        Booking[] @relation("TherapistProfileBookings")
+  appointments     Appointment[]
+}
+
+model Appointment {
+  id            String            @id @default(cuid())
+  clientId       String
+  practitionerId String
+  serviceId      String
+  startTime     DateTime
+  endTime       DateTime
+  status        AppointmentStatus @default(SCHEDULED)
+  notes         String?           @db.Text
+  googleEventId  String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  client         User              @relation("ClientAppointments", fields: [clientId], references: [id], map: "Appointment_clientId_fkey")
+  practitioner  User              @relation("PractitionerAppointments", fields: [practitionerId], references: [id], map: "Appointment_practitionerId_fkey")
+  service       Service          @relation(fields: [serviceId], references: [id])
+  clientProfile   ClientProfile?     @relation(fields: [clientId], references: [userId], map: "Appointment_clientProfile_fkey")
+  practitionerProfile PractitionerProfile? @relation(fields: [practitionerId], references: [userId], map: "Appointment_practitionerProfile_fkey")
+  payments       Payment[]
+
+  @@index([clientId])
+  @@index([practitionerId])
+  @@index([serviceId])
+  @@index([status])
+  @@index([startTime])
+}
+
+model Assessment {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  questions   Json     // Store assessment questions
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  answers     AssessmentAnswer[]
 }
 
 model Service {
   id          String   @id @default(cuid())
   name        String
   description String?  @db.Text
-  duration    Int      // minutes
+  duration    Int      // Duration in minutes
   price       Float
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  bookings    Booking[]
-}
-
-model Booking {
-  id            String       @id @default(cuid())
-  clientId      String
-  therapistId   String
-  serviceId     String
-  startTime     DateTime
-  endTime       DateTime
-  status        BookingStatus @default(SCHEDULED)
-  notes         String?      @db.Text
-  paymentStatus PaymentStatus @default(PENDING)
-  paymentId     String?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-
-  client        User         @relation("ClientBookings", fields: [clientId], references: [id], map: "booking_client_id_fkey")
-  therapist     User         @relation("TherapistBookings", fields: [therapistId], references: [id], map: "booking_therapist_id_fkey")
-  service       Service      @relation(fields: [serviceId], references: [id])
-  sessionNotes  SessionNote[]
-  clientProfile ClientProfile? @relation("ClientProfileBookings", fields: [clientId], references: [userId])
-  therapistProfile TherapistProfile? @relation("TherapistProfileBookings", fields: [therapistId], references: [userId])
-}
-
-model SessionNote {
-  id        String   @id @default(cuid())
-  bookingId String
-  content   String   @db.Text
-  isPrivate Boolean  @default(false) // visible to client or not
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-}
-
-model Assessment {
-  id          String           @id @default(cuid())
-  clientId    String
-  type        AssessmentType
-  responses   Json             // Store assessment responses
-  score       Float?
-  result      String?          @db.Text
-  interpretation String?       @db.Text
-  completedAt DateTime         @default(now())
-  createdAt   DateTime         @default(now())
-
-  client      User             @relation(fields: [clientId], references: [id], map: "assessment_client_id_fkey")
-  clientProfile ClientProfile? @relation("ClientAssessments", fields: [clientId], references: [userId], map: "assessment_client_profile_id_fkey")
+  appointments Appointment[]
 }
 
 model MoodEntry {
   id          String   @id @default(cuid())
-  clientId    String
+  userId      String
   mood        Int      // 1-10 scale
   notes       String?  @db.Text
-  tags        String[]
+  tags        String[]  // Optional tags for mood tracking
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  client      User     @relation(fields: [clientId], references: [id], map: "mood_entry_client_id_fkey")
-  clientProfile ClientProfile? @relation("ClientMoodEntries", fields: [clientId], references: [userId], map: "mood_entry_client_profile_id_fkey")
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade, map: "MoodEntry_userId_fkey")
+  clientProfile ClientProfile?  @relation(fields: [userId], references: [userId], map: "MoodEntry_clientProfile_fkey")
+}
+
+model AssessmentAnswer {
+  id           String   @id @default(cuid())
+  userId        String
+  assessmentId  String
+  answers       Json     // Store user's answers
+  score         Float?
+  completedAt   DateTime @default(now())
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade, map: "AssessmentAnswer_userId_fkey")
+  assessment    Assessment      @relation(fields: [assessmentId], references: [id], map: "AssessmentAnswer_assessmentId_fkey")
+  clientProfile ClientProfile?  @relation(fields: [userId], references: [userId], map: "AssessmentAnswer_clientProfile_fkey")
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  appointmentId  String
+  userId         String
+  amount         Float
+  stripePaymentId String?
+  status         PaymentStatus @default(PENDING)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  appointment    Appointment    @relation(fields: [appointmentId], references: [id], map: "Payment_appointmentId_fkey")
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Payment_userId_fkey")
 }
 
 enum UserRole {
   CLIENT
-  THERAPIST
+  PRACTITIONER
   ADMIN
 }
 
-enum BookingStatus {
+enum AppointmentStatus {
   SCHEDULED
   COMPLETED
   CANCELLED
   NO_SHOW
+  RESCHEDULED
 }
 
 enum PaymentStatus {
   PENDING
-  PAID
-  REFUNDED
+  COMPLETED
   FAILED
-}
-
-enum AssessmentType {
-  ADHD
-  ANXIETY
-  DEPRESSION
-  BURNOUT
-  TRAUMA
+  REFUNDED
 }
