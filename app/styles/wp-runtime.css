@@ -1,0 +1,65 @@
+.elementor-popup-modal[hidden] {
+  display: none !important;
+}
+
+.elementor-popup-modal.dialog-type-lightbox {
+  inset: 0;
+  padding: 20px;
+  position: fixed;
+  z-index: 100000;
+}
+
+.elementor-popup-modal .dialog-widget-content {
+  max-height: 100%;
+  overflow: auto;
+  position: relative;
+}
+
+.elementor-popup-modal .dialog-close-button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  font-size: 24px;
+  justify-content: center;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+}
+
+.elementor-popup-modal .dialog-close-button .eicon-close {
+  line-height: 1;
+}
+
+body.wp-popup-open {
+  overflow: hidden;
+}
+
+form.elementor-form .elementor-message {
+  margin-top: 16px;
+}
+
+.elementor-widget-nav-menu .elementor-widget-container {
+  position: relative;
+}
+
+@media (max-width: 1024px) {
+  .elementor-widget-nav-menu .elementor-nav-menu--dropdown {
+    display: none !important;
+    position: absolute !important;
+    z-index: 1000;
+  }
+
+  .elementor-widget-nav-menu .elementor-nav-menu--dropdown.wp-dropdown-open {
+    display: block !important;
+  }
+
+  .elementor-widget-nav-menu .elementor-nav-menu--dropdown .elementor-nav-menu {
+    width: 100% !important;
+  }
+}

@@ -1,0 +1,365 @@
+{
+  "home": {
+    "slug": "home",
+    "path": "/",
+    "pageId": 13,
+    "bodyClass": "home wp-singular page-template-default page page-id-13 wp-embed-responsive wp-theme-oceanwp oceanwp-theme dropdown-mobile no-header-border default-breakpoint content-full-screen page-header-disabled no-margins elementor-default elementor-kit-6 elementor-page elementor-page-13",
+    "yoast": {
+      "title": "Home - OKU Therapy",
+      "robots": {
+        "index": "index",
+        "follow": "follow",
+        "max-snippet": "max-snippet:-1",
+        "max-image-preview": "max-image-preview:large",
+        "max-video-preview": "max-video-preview:-1"
+      },
+      "canonical": "https://okutherapy.com/",
+      "og_locale": "en_US",
+      "og_type": "article",
+      "og_title": "Home - OKU Therapy",
+      "og_description": "Come as you are. We hold space for your grief Oku is a psychotherapy collective offering inclusive, trauma-informed care for all parts of who you are. Book a free consultation to begin gently. Book a free 1:1 consultation A place to explore not perform. Slow Healing We move at the pace your story asks for—never [&hellip;]",
+      "og_url": "https://okutherapy.com/",
+      "og_site_name": "OKU Therapy",
+      "article_modified_time": "2026-03-17T07:38:15+00:00",
+      "og_image": [
+        {
+          "width": 100,
+          "height": 101,
+          "url": "https://okutherapy.com/wp-content/uploads/2025/06/Frame-23-2.png",
+          "type": "image/png"
+        }
+      ],
+      "twitter_card": "summary_large_image",
+      "twitter_misc": {
+        "Est. reading time": "14 minutes"
+      },
+      "schema": {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://okutherapy.com/",
+            "url": "https://okutherapy.com/",
+            "name": "Home - OKU Therapy",
+            "isPartOf": {
+              "@id": "https://okutherapy.com/#website"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://okutherapy.com/#primaryimage"
+            },
+            "image": {
+              "@id": "https://okutherapy.com/#primaryimage"
+            },
+            "thumbnailUrl": "https://okutherapy.com/wp-content/uploads/2025/06/Frame-23-2.png",
+            "datePublished": "2025-06-28T09:13:56+00:00",
+            "dateModified": "2026-03-17T07:38:15+00:00",
+            "breadcrumb": {
+              "@id": "https://okutherapy.com/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://okutherapy.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://okutherapy.com/#primaryimage",
+            "url": "https://okutherapy.com/wp-content/uploads/2025/06/Frame-23-2.png",
+            "contentUrl": "https://okutherapy.com/wp-content/uploads/2025/06/Frame-23-2.png",
+            "width": 100,
+            "height": 101
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://okutherapy.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://okutherapy.com/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://okutherapy.com/#website",
+            "url": "https://okutherapy.com/",
+            "name": "OKU Therapy",
+            "description": "Depth-oriented Psychotherapy Clinic",
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://okutherapy.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          }
+        ]
+      }
+    },
+    "title": "Home",
+    "modified": "2026-03-17T13:08:15"
+  },
+  "about-us": {
+    "slug": "about-us",
+    "path": "/about-us/",
+    "pageId": 453,
+    "bodyClass": "wp-singular page-template-default page page-id-453 wp-embed-responsive wp-theme-oceanwp oceanwp-theme dropdown-mobile no-header-border default-breakpoint content-full-screen page-header-disabled no-margins elementor-default elementor-kit-6 elementor-page elementor-page-453",
+    "yoast": {
+      "title": "About Us - OKU Therapy",
+      "robots": {
+        "index": "index",
+        "follow": "follow",
+        "max-snippet": "max-snippet:-1",
+        "max-image-preview": "max-image-preview:large",
+        "max-video-preview": "max-video-preview:-1"
+      },
+      "canonical": "https://okutherapy.com/about-us/",
+      "og_locale": "en_US",
+      "og_type": "article",
+      "og_title": "About Us - OKU Therapy",
+      "og_description": "The heart behind oku therapy OKU (奥) is a Japanese word that means “the innermost,” “the depths,” or “the place within.”  It speaks to the quiet spaces we all carry — layered, tender, and often unseen. At Oku Therapy, we offer a place for those parts. We don’t believe healing is about becoming someone new. [&hellip;]",
+      "og_url": "https://okutherapy.com/about-us/",
+      "og_site_name": "OKU Therapy",
+      "article_modified_time": "2025-07-13T20:34:38+00:00",
+      "og_image": [
+        {
+          "width": 1440,
+          "height": 731,
+          "url": "https://okutherapy.com/wp-content/uploads/2025/07/Group-21.png",
+          "type": "image/png"
+        }
+      ],
+      "twitter_card": "summary_large_image",
+      "twitter_misc": {
+        "Est. reading time": "4 minutes"
+      },
+      "schema": {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://okutherapy.com/about-us/",
+            "url": "https://okutherapy.com/about-us/",
+            "name": "About Us - OKU Therapy",
+            "isPartOf": {
+              "@id": "https://okutherapy.com/#website"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://okutherapy.com/about-us/#primaryimage"
+            },
+            "image": {
+              "@id": "https://okutherapy.com/about-us/#primaryimage"
+            },
+            "thumbnailUrl": "https://okutherapy.com/wp-content/uploads/2025/07/Group-21-1024x520.png",
+            "datePublished": "2025-07-05T03:23:47+00:00",
+            "dateModified": "2025-07-13T20:34:38+00:00",
+            "breadcrumb": {
+              "@id": "https://okutherapy.com/about-us/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://okutherapy.com/about-us/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://okutherapy.com/about-us/#primaryimage",
+            "url": "https://okutherapy.com/wp-content/uploads/2025/07/Group-21.png",
+            "contentUrl": "https://okutherapy.com/wp-content/uploads/2025/07/Group-21.png",
+            "width": 1440,
+            "height": 731
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://okutherapy.com/about-us/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://okutherapy.com/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "About Us"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://okutherapy.com/#website",
+            "url": "https://okutherapy.com/",
+            "name": "OKU Therapy",
+            "description": "Depth-oriented Psychotherapy Clinic",
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://okutherapy.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          }
+        ]
+      }
+    },
+    "title": "About Us",
+    "modified": "2025-07-14T02:04:38"
+  },
+  "people": {
+    "slug": "people",
+    "path": "/people/",
+    "pageId": 426,
+    "bodyClass": "wp-singular page-template-default page page-id-426 wp-embed-responsive wp-theme-oceanwp oceanwp-theme dropdown-mobile no-header-border default-breakpoint content-full-screen page-header-disabled no-margins elementor-default elementor-kit-6 elementor-page elementor-page-426",
+    "yoast": {
+      "title": "People - OKU Therapy",
+      "robots": {
+        "index": "index",
+        "follow": "follow",
+        "max-snippet": "max-snippet:-1",
+        "max-image-preview": "max-image-preview:large",
+        "max-video-preview": "max-video-preview:-1"
+      },
+      "canonical": "https://okutherapy.com/people/",
+      "og_locale": "en_US",
+      "og_type": "article",
+      "og_title": "People - OKU Therapy",
+      "og_description": "You’re not alone. We hold space for your belonging Oku | People is a collective space for those who ache for connection. A space to share the weight, find community, and gently begin again. Book a free 1:1 consultation This space is for you We’re not meant to heal in isolation. You’re not the only one [&hellip;]",
+      "og_url": "https://okutherapy.com/people/",
+      "og_site_name": "OKU Therapy",
+      "article_modified_time": "2025-07-13T20:35:15+00:00",
+      "og_image": [
+        {
+          "width": 443,
+          "height": 470,
+          "url": "https://okutherapy.com/wp-content/uploads/2025/07/Frame-243.png",
+          "type": "image/png"
+        }
+      ],
+      "twitter_card": "summary_large_image",
+      "twitter_misc": {
+        "Est. reading time": "3 minutes"
+      },
+      "schema": {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://okutherapy.com/people/",
+            "url": "https://okutherapy.com/people/",
+            "name": "People - OKU Therapy",
+            "isPartOf": {
+              "@id": "https://okutherapy.com/#website"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://okutherapy.com/people/#primaryimage"
+            },
+            "image": {
+              "@id": "https://okutherapy.com/people/#primaryimage"
+            },
+            "thumbnailUrl": "https://okutherapy.com/wp-content/uploads/2025/07/Frame-243.png",
+            "datePublished": "2025-06-28T22:26:02+00:00",
+            "dateModified": "2025-07-13T20:35:15+00:00",
+            "breadcrumb": {
+              "@id": "https://okutherapy.com/people/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://okutherapy.com/people/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://okutherapy.com/people/#primaryimage",
+            "url": "https://okutherapy.com/wp-content/uploads/2025/07/Frame-243.png",
+            "contentUrl": "https://okutherapy.com/wp-content/uploads/2025/07/Frame-243.png",
+            "width": 443,
+            "height": 470
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://okutherapy.com/people/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://okutherapy.com/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "People"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://okutherapy.com/#website",
+            "url": "https://okutherapy.com/",
+            "name": "OKU Therapy",
+            "description": "Depth-oriented Psychotherapy Clinic",
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://okutherapy.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          }
+        ]
+      }
+    },
+    "title": "People",
+    "modified": "2025-07-14T02:05:15"
+  }
+}
