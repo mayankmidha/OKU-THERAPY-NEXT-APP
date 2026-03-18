@@ -1,0 +1,30 @@
+# Database
+DATABASE_URL="postgresql://username:password@localhost:5432/oku_therapy_db"
+
+# NextAuth.js
+NEXTAUTH_SECRET="your-super-secret-key-change-this-in-production"
+NEXTAUTH_URL="http://localhost:3000"
+
+# OAuth Providers (optional)
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
+
+# Email (optional)
+EMAIL_SERVER_HOST=""
+EMAIL_SERVER_PORT=""
+EMAIL_SERVER_USER=""
+EMAIL_SERVER_PASSWORD=""
+EMAIL_FROM=""
+
+# Stripe for payments (optional)
+STRIPE_PUBLISHABLE_KEY=""
+STRIPE_SECRET_KEY=""
+STRIPE_WEBHOOK_SECRET=""
+
+# Google Calendar API (optional)
+GOOGLE_CALENDAR_CLIENT_ID=""
+GOOGLE_CALENDAR_CLIENT_SECRET=""
+
+# Razorpay for payments (optional)
+RAZORPAY_KEY_ID=""
+RAZORPAY_KEY_SECRET=""

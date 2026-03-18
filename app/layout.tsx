@@ -10,6 +10,7 @@ import {
 
 import "./globals.css";
 import "./styles/wp-runtime.css";
+import AuthProvider from "@/components/auth-provider";
 
 export const metadata: Metadata = {
   description: "Depth-oriented Psychotherapy Clinic",
@@ -74,7 +75,11 @@ export default async function RootLayout({
           rel="apple-touch-icon"
         />
       </head>
-      <body className={bodyClass}>{children}</body>
+      <body className={bodyClass}>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }
