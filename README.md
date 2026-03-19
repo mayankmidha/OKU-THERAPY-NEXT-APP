@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## OKU Therapy SaaS MVP
 
-## Getting Started
+This repo now contains the Phase 1 foundation for the OKU Therapy SaaS inside the existing Next.js App Router project. The WordPress-backed marketing pages remain intact, while the product app lives under the authenticated route groups below.
 
-First, run the development server:
+## Setup
+
+1. Install dependencies.
+
+```bash
+npm install
+```
+
+2. Configure your environment variables, especially `DATABASE_URL`, `AUTH_SECRET`, and `NEXTAUTH_URL`.
+
+3. Seed demo data.
+
+```bash
+npm run db:seed
+```
+
+4. Start the app.
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Demo Users
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `client@demo.com` / `demo123`
+- `practitioner@demo.com` / `demo123`
+- `admin@demo.com` / `demo123`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Route Structure
 
-## Learn More
+- Marketing pages: `/`, `/about-us`, `/people`
+- Auth: `/auth/login`, `/auth/signup`
+- Client app: `/client/dashboard`, `/client/book-appointment`, `/client/assessments`, `/client/mood-tracker`
+- Practitioner app: `/practitioner/dashboard`
+- Admin app: `/admin/dashboard`
+- Legacy dashboard paths still exist as redirects so existing links do not break while the app is being migrated.
 
-To learn more about Next.js, take a look at the following resources:
+## Phase 1 Notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Prisma schema usage and seed data were aligned with the current MVP models.
+- Auth now has a working login flow, signup page, role-aware redirects, and a corrected `/api/auth/user` response.
+- Legacy `THERAPIST` dashboard drift was replaced with `PRACTITIONER` routes and redirect shims.
+- Placeholder pages were added where needed so there are no broken dashboard links heading into later phases.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Verification
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run lint
+npm run build
+```

@@ -1,241 +1,293 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
-const assessments = [
+type AssessmentHistoryItem = {
+  id: string
+  score: number | null
+  completedAt: string
+  assessment: {
+    title: string
+    description: string | null
+  }
+}
+
+const availableAssessments = [
   {
     id: 'phq9',
     title: 'PHQ-9 Depression Assessment',
-    description: 'Screen for depression symptoms over the past 2 weeks',
+    description: 'A calm self-check for depression symptoms over the last two weeks.',
     duration: '5 minutes',
     questions: 9,
-    icon: '😔',
-    color: 'blue'
   },
-  {
-    id: 'gad7',
-    title: 'GAD-7 Anxiety Assessment',
-    description: 'Assess anxiety severity and its impact on daily life',
-    duration: '5 minutes',
-    questions: 7,
-    icon: '😰',
-    color: 'yellow'
-  },
-  {
-    id: 'dass21',
-    title: 'DASS-21 Depression, Anxiety, and Stress Scale',
-    description: 'Comprehensive assessment of mental health symptoms',
-    duration: '10 minutes',
-    questions: 21,
-    icon: '📊',
-    color: 'purple'
-  },
-  {
-    id: 'adhd',
-    title: 'ADHD Self-Assessment',
-    description: 'Screen for symptoms of ADHD in adults',
-    duration: '10 minutes',
-    questions: 18,
-    icon: '🧠',
-    color: 'orange'
-  },
-  {
-    id: 'ptsd',
-    title: 'PTSD Screening',
-    description: 'Assess symptoms related to traumatic events',
-    duration: '8 minutes',
-    questions: 5,
-    icon: '⚡',
-    color: 'red'
-  }
+] as const
+
+const supportCopy = [
+  'This is a self-check, not a diagnosis.',
+  'Take your time and answer honestly based on the last 2 weeks.',
+  'If you feel unsafe, contact local emergency services or a trusted person right away.',
 ]
 
 export default function AssessmentsPage() {
-  const [completedAssessments, setCompletedAssessments] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+  const [completedAssessments, setCompletedAssessments] = useState<AssessmentHistoryItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    fetchAssessmentHistory()
+    const fetchAssessmentHistory = async () => {
+      try {
+        const response = await fetch('/api/client/assessments')
+
+        if (response.ok) {
+          const data = (await response.json()) as AssessmentHistoryItem[]
+          setCompletedAssessments(data)
+        }
+      } catch (error) {
+        console.error('Error fetching assessment history:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void fetchAssessmentHistory()
   }, [])
 
-  const fetchAssessmentHistory = async () => {
-    try {
-      const response = await fetch('/api/client/assessments')
-      if (response.ok) {
-        const data = await response.json()
-        setCompletedAssessments(data)
+  const latestPhq9Score = completedAssessments.find(
+    (assessment) => assessment.assessment.title === 'PHQ-9 Depression Assessment'
+  )?.score
+
+  const getScoreTone = (score: number | null | undefined) => {
+    if (score === null || score === undefined) {
+      return {
+        badge: 'bg-slate-100 text-slate-500',
+        text: 'text-slate-500',
+        label: 'Not yet completed',
       }
-    } catch (error) {
-      console.error('Error fetching assessment history:', error)
-    } finally {
-      setIsLoading(false)
     }
-  }
 
-  const handleStartAssessment = (assessmentId: string) => {
-    router.push(`/client/assessments/${assessmentId}`)
-  }
+    if (score <= 4) {
+      return {
+        badge: 'bg-emerald-50 text-emerald-700',
+        text: 'text-emerald-700',
+        label: 'Low range',
+      }
+    }
 
-  const getLatestScore = (assessmentId: string) => {
-    const assessment = completedAssessments.find((a: any) => a.assessment?.title?.includes(assessmentId.toUpperCase()))
-    return assessment && typeof assessment.score === 'number' ? assessment.score : null
-  }
+    if (score <= 9) {
+      return {
+        badge: 'bg-amber-50 text-amber-700',
+        text: 'text-amber-700',
+        label: 'Mild range',
+      }
+    }
 
-  const getScoreColor = (score: number | null) => {
-    if (score === null) return 'text-gray-400'
-    if (score !== null && score <= 4) return 'text-green-600'
-    if (score !== null && score <= 9) return 'text-yellow-600'
-    if (score !== null && score <= 14) return 'text-orange-600'
-    return 'text-red-600'
+    if (score <= 14) {
+      return {
+        badge: 'bg-orange-50 text-orange-700',
+        text: 'text-orange-700',
+        label: 'Moderate range',
+      }
+    }
+
+    return {
+      badge: 'bg-rose-50 text-rose-700',
+      text: 'text-rose-700',
+      label: 'Higher range',
+    }
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Loading assessments...</p>
+      <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(233,245,255,0.95),_rgba(248,250,252,1)_45%,_rgba(241,245,249,1)_100%)]">
+        <div className="mx-auto flex min-h-screen max-w-6xl items-center justify-center px-4">
+          <div className="rounded-[28px] border border-white/70 bg-white/85 px-8 py-10 text-center shadow-[0_20px_70px_rgba(15,23,42,0.10)] backdrop-blur">
+            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-2 border-slate-200 border-t-slate-900" />
+            <p className="mt-4 text-sm font-medium text-slate-600">Loading your assessment space...</p>
+          </div>
         </div>
       </div>
     )
   }
 
+  const phqTone = getScoreTone(latestPhq9Score)
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/client/dashboard" className="text-blue-600 hover:text-blue-800 font-medium">
-                ← Back to Dashboard
-              </Link>
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(233,245,255,0.95),_rgba(248,250,252,1)_40%,_rgba(241,245,249,1)_100%)] text-slate-900">
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <Link
+            className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white"
+            href="/client/dashboard"
+          >
+            Back to dashboard
+          </Link>
+          <span className="rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
+            Private assessment space
+          </span>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <section className="rounded-[32px] border border-white/70 bg-white/85 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8">
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-500">Mental health assessments</p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+              A quiet place to check in with yourself.
+            </h1>
+            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
+              We are keeping the first release focused and supportive so the experience stays clear, calm, and useful.
+            </p>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              {supportCopy.map((line) => (
+                <div key={line} className="rounded-2xl bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
+                  {line}
+                </div>
+              ))}
             </div>
-          </div>
-        </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Mental Health Assessments</h1>
-          <p className="text-gray-600 text-lg">
-            Take evidence-based assessments to better understand your mental health and track your progress over time.
-          </p>
-        </div>
-
-        {/* Available Assessments */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {assessments.map((assessment) => (
-            <div
-              key={assessment.id}
-              className="bg-white shadow-lg rounded-lg p-6 hover:shadow-xl transition-shadow duration-200 cursor-pointer"
-              onClick={() => handleStartAssessment(assessment.id)}
-            >
-              <div className="flex items-center mb-4">
-                <div className="text-4xl mr-4">{assessment.icon}</div>
+            <div className="mt-8 rounded-[28px] border border-slate-200 bg-slate-50 p-6">
+              <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{assessment.title}</h3>
-                  <p className="text-sm text-gray-600">{assessment.duration}</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Available now</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-slate-900">PHQ-9 Depression Assessment</h2>
+                </div>
+                <span className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white">
+                  Recommended
+                </span>
+              </div>
+
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">
+                A short evidence-based screening that helps you reflect on mood, energy, sleep, focus, and emotional strain.
+              </p>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Duration</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">{availableAssessments[0].duration}</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Questions</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">{availableAssessments[0].questions}</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Status</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">Private and saved</p>
                 </div>
               </div>
-              <p className="text-gray-700 mb-4">{assessment.description}</p>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">{assessment.questions} questions</span>
-                <button className={`px-4 py-2 rounded-md text-white font-medium transition-colors duration-200 ${
-                  assessment.color === 'blue' ? 'bg-blue-600 hover:bg-blue-700' :
-                  assessment.color === 'yellow' ? 'bg-yellow-600 hover:bg-yellow-700' :
-                  assessment.color === 'purple' ? 'bg-purple-600 hover:bg-purple-700' :
-                  assessment.color === 'orange' ? 'bg-orange-600 hover:bg-orange-700' :
-                  'bg-red-600 hover:bg-red-700'
-                }`}>
-                  Start Assessment
+
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <button
+                  className="inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                  onClick={() => router.push('/client/assessments/phq9')}
+                  type="button"
+                >
+                  Start PHQ-9
                 </button>
+                <Link
+                  className="inline-flex items-center justify-center rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-white"
+                  href="/client/book-appointment"
+                >
+                  Book a session
+                </Link>
               </div>
-              {getLatestScore(assessment.id) !== null && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Latest Score:</span>
-                    <span className={`font-bold ${getScoreColor(getLatestScore(assessment.id)!)}`}>
-                      {getLatestScore(assessment.id)}/27
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
-          ))}
+          </section>
+
+          <aside className="space-y-4">
+            <div className="rounded-[28px] border border-slate-200 bg-white/85 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.08)] backdrop-blur">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Most recent result</p>
+              <div className={`mt-4 inline-flex rounded-full px-4 py-2 text-sm font-semibold ${phqTone.badge}`}>
+                {phqTone.label}
+              </div>
+              <p className={`mt-4 text-3xl font-semibold tracking-tight ${phqTone.text}`}>
+                {latestPhq9Score !== null && latestPhq9Score !== undefined ? `${latestPhq9Score}/27` : 'No score yet'}
+              </p>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                We surface this here so you can keep track of your latest check-in without hunting through the app.
+              </p>
+            </div>
+
+            <div className="rounded-[28px] border border-rose-200 bg-rose-50 p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-rose-700">Support note</p>
+              <h3 className="mt-3 text-lg font-semibold text-rose-950">If something feels urgent</h3>
+              <p className="mt-3 text-sm leading-6 text-rose-900">
+                These tools are here to help you reflect, not replace urgent support. If you feel unsafe, call local emergency services or reach out to a trusted person right away.
+              </p>
+            </div>
+          </aside>
         </div>
 
-        {/* Assessment History */}
-        <div className="bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Assessment History</h2>
+        <section className="mt-6 rounded-[32px] border border-white/70 bg-white/85 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.10)] backdrop-blur sm:p-8">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-500">Assessment history</p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900">Your completed check-ins</h2>
+            </div>
+            <span className="text-sm text-slate-500">{completedAssessments.length} completed</span>
+          </div>
+
           {completedAssessments.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Assessment
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Score
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Completed
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {completedAssessments.map((assessment: any) => (
-                    <tr key={assessment.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {assessment.assessment?.title}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          assessment.score !== null && assessment.score !== undefined ? getScoreColor(assessment.score) : 'text-gray-400'
-                        }`}>
-                          {assessment.score !== null && assessment.score !== undefined ? assessment.score : 'N/A'}
+            <div className="mt-6 grid gap-4">
+              {completedAssessments.map((assessment) => {
+                const tone = getScoreTone(assessment.score)
+
+                return (
+                  <div
+                    key={assessment.id}
+                    className="rounded-[28px] border border-slate-200 bg-slate-50 p-5 transition hover:border-slate-300 hover:bg-white"
+                  >
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                          {assessment.assessment.title}
+                        </p>
+                        <h3 className="mt-2 text-lg font-semibold text-slate-900">
+                          {assessment.score !== null ? `${assessment.score}/27` : 'Score unavailable'}
+                        </h3>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">
+                          {assessment.assessment.description ??
+                            'Completed assessment saved in your client workspace.'}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className={`rounded-full px-4 py-2 text-sm font-semibold ${tone.badge}`}>{tone.label}</span>
+                        <span className="rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-600">
+                          {new Date(assessment.completedAt).toLocaleDateString()}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(assessment.completedAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
-                          onClick={() => handleStartAssessment(assessment.id)}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                          onClick={() => router.push('/client/assessments/phq9')}
+                          type="button"
                         >
                           Retake
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <div className="text-gray-400 text-5xl mb-4">📝</div>
-              <p className="text-gray-600 text-lg mb-4">No assessments completed yet</p>
-              <p className="text-gray-600">Take your first assessment to establish a baseline for your mental health journey.</p>
+            <div className="mt-6 rounded-[28px] border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white text-3xl shadow-sm">
+                📝
+              </div>
+              <h3 className="mt-5 text-xl font-semibold text-slate-900">No assessments completed yet</h3>
+              <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-600">
+                Start with PHQ-9 if you want a gentle check-in on how you have been feeling over the last two weeks.
+              </p>
               <button
+                className="mt-6 inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
                 onClick={() => router.push('/client/assessments/phq9')}
-                className="mt-6 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                type="button"
               >
-                Start PHQ-9 Assessment
+                Start PHQ-9
               </button>
             </div>
           )}
-        </div>
+        </section>
       </main>
     </div>
   )

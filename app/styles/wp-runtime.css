@@ -48,6 +48,27 @@ form.elementor-form .elementor-message {
   position: relative;
 }
 
+#site-header {
+  position: sticky !important;
+  top: 0;
+  z-index: 1100;
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    backdrop-filter 180ms ease;
+}
+
+#site-header.wp-site-header-sticky {
+  background: rgba(252, 250, 245, 0.86) !important;
+  backdrop-filter: blur(18px);
+  box-shadow: 0 16px 40px rgba(36, 27, 18, 0.08);
+}
+
+#site-header.wp-site-header-sticky .elementor-item,
+#site-header.wp-site-header-sticky .dynamic-button {
+  transition: color 180ms ease, border-color 180ms ease;
+}
+
 @media (max-width: 1024px) {
   .elementor-widget-nav-menu .elementor-nav-menu--dropdown {
     display: none !important;

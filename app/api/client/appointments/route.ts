@@ -102,14 +102,19 @@ export async function POST(req: Request) {
       }
     })
 
-    const serviceId = defaultService?.id || 'default-service-id'
+    if (!defaultService) {
+      return NextResponse.json(
+        { error: 'No active services are configured yet' },
+        { status: 503 }
+      )
+    }
 
     // Create appointment
     const appointment = await prisma.appointment.create({
       data: {
         clientId: session.user.id,
         practitionerId,
-        serviceId,
+        serviceId: defaultService.id,
         startTime: startDateTime,
         endTime: endDateTime,
         notes: notes || '',

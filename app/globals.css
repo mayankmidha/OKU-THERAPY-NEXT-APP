@@ -4,6 +4,20 @@ body {
   padding: 0;
 }
 
+html {
+  background: #fcfaf5;
+}
+
 body {
   overflow-x: hidden;
+  background:
+    radial-gradient(circle at top, rgba(193, 219, 210, 0.2), transparent 28%),
+    linear-gradient(180deg, #fcfaf5 0%, #f6efe3 42%, #f8f5ef 100%);
+  color: #1c1917;
+  font-family:
+    "Inter",
+    "Segoe UI",
+    sans-serif;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
 }

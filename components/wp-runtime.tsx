@@ -157,11 +157,99 @@ function setElementorYouTubeEmbeds(): void {
   });
 }
 
+function setMarketingCtas(): void {
+  const ctas = document.querySelectorAll<HTMLAnchorElement>(
+    "a.dynamic-button[href*='wa.me/919953879928']",
+  );
+
+  ctas.forEach((primaryCta) => {
+    const parent = primaryCta.parentElement;
+    if (!parent) {
+      return;
+    }
+
+    let stack = parent.querySelector<HTMLElement>(".oku-cta-stack");
+    if (!stack) {
+      stack = document.createElement("div");
+      stack.className = "oku-cta-stack";
+      parent.insertBefore(stack, primaryCta);
+      stack.appendChild(primaryCta);
+    }
+
+    primaryCta.href = "/auth/signup";
+    primaryCta.textContent = "Start a confidential consultation";
+
+    const ensureActionLink = (className: string, href: string, label: string) => {
+      let link = stack?.querySelector<HTMLAnchorElement>(`.${className}`);
+      if (!link) {
+        link = document.createElement("a");
+        link.className = `dynamic-button ${className}`;
+        stack?.appendChild(link);
+      }
+
+      link.href = href;
+      link.textContent = label;
+    };
+
+    ensureActionLink("oku-secondary-cta", "/auth/login", "Client login");
+    ensureActionLink("oku-tertiary-cta", "/auth/signup", "Take a 5-minute PHQ-9 check-in");
+  });
+
+  if (!document.getElementById("oku-cta-runtime-styles")) {
+    const style = document.createElement("style");
+    style.id = "oku-cta-runtime-styles";
+    style.textContent = `
+      .oku-cta-stack {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .oku-cta-stack .dynamic-button {
+        margin: 0;
+      }
+
+      .oku-cta-stack .oku-secondary-cta,
+      .oku-cta-stack .oku-tertiary-cta {
+        color: #2d2d2d;
+        border-color: rgba(45, 45, 45, 0.25);
+      }
+
+      .oku-cta-stack .oku-secondary-cta::before,
+      .oku-cta-stack .oku-tertiary-cta::before {
+        background-color: rgba(255, 255, 255, 0.75);
+      }
+
+      .oku-cta-stack .oku-secondary-cta::after,
+      .oku-cta-stack .oku-tertiary-cta::after {
+        background-color: #2d2d2d;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
+
 export function WpRuntime({ bodyClass }: WpRuntimeProps) {
   useEffect(() => {
     document.body.className = bodyClass;
 
     const cleanups: Array<() => void> = [];
+    const siteHeader = document.getElementById("site-header");
+
+    if (siteHeader) {
+      const syncStickyHeader = () => {
+        siteHeader.classList.toggle("wp-site-header-sticky", window.scrollY > 12);
+      };
+
+      window.addEventListener("scroll", syncStickyHeader, { passive: true });
+      syncStickyHeader();
+
+      cleanups.push(() => {
+        window.removeEventListener("scroll", syncStickyHeader);
+        siteHeader.classList.remove("wp-site-header-sticky");
+      });
+    }
 
     const textRotationTarget = document.querySelector<HTMLElement>(
       "#change .elementor-heading-title",
@@ -499,6 +587,7 @@ export function WpRuntime({ bodyClass }: WpRuntimeProps) {
 
     setElementorHostedBackgroundVideos();
     setElementorYouTubeEmbeds();
+    setMarketingCtas();
 
     return () => {
       cleanups.forEach((cleanup) => cleanup());

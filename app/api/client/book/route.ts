@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { auth } from '../../../../lib/auth'
-import { prisma } from '../../../../lib/prisma'
+import { auth } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
@@ -20,8 +20,7 @@ export async function GET() {
       }
     })
 
-    // Get approved therapists
-    const therapists = await prisma.user.findMany({
+    const practitioners = await prisma.user.findMany({
       where: {
         role: 'PRACTITIONER',
         practitionerProfile: {
@@ -42,7 +41,7 @@ export async function GET() {
 
     return NextResponse.json({
       services,
-      therapists
+      practitioners
     })
   } catch (error) {
     console.error('Error fetching booking data:', error)
@@ -61,11 +60,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { therapistId, serviceId, startTime, notes } = await req.json()
+    const { practitionerId, serviceId, startTime, notes } = await req.json()
 
-    if (!therapistId || !serviceId || !startTime) {
+    if (!practitionerId || !serviceId || !startTime) {
       return NextResponse.json(
-        { error: 'Therapist, service, and start time are required' },
+        { error: 'Practitioner, service, and start time are required' },
         { status: 400 }
       )
     }
@@ -85,10 +84,10 @@ export async function POST(req: Request) {
 
     // Create booking
     const booking = await prisma.appointment.create({
-      data: {
-        clientId: session.user.id,
-        practitionerId: therapistId,
-        serviceId: serviceId,
+        data: {
+          clientId: session.user.id,
+          practitionerId,
+          serviceId: serviceId,
         startTime: startDateTime,
         endTime: endDateTime,
         notes: notes || '',

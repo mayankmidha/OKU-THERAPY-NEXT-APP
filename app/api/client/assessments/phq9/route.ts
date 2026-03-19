@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { answers, score, result, interpretation } = await req.json()
+    const { answers, score } = await req.json()
 
     if (!answers) {
       return NextResponse.json(

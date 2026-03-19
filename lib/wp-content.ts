@@ -5,6 +5,10 @@ import { load } from "cheerio";
 import type { Metadata } from "next";
 
 import routesJson from "@/content/generated/routes.json";
+import {
+  okuMarketingCopyRewrite,
+  okuMarketingLinkCopy,
+} from "@/lib/cta-copy";
 import stylesheetsJson from "@/content/generated/stylesheets.json";
 
 export type RouteSlug = "home" | "about-us" | "people";
@@ -69,6 +73,26 @@ const SITE_ORIGINS = [
   "https://www.okutherapy.com",
   "http://www.okutherapy.com",
 ];
+const MARKETING_LINK_REWRITES = [
+  {
+    hrefPatterns: [/^https?:\/\/wa\.me\//i, /^https?:\/\/api\.whatsapp\.com\/send/i],
+    label: okuMarketingLinkCopy.primaryConsultation.label,
+    sourceLabels: okuMarketingLinkCopy.primaryConsultation.sourceLabels,
+    targetHref: okuMarketingLinkCopy.primaryConsultation.targetHref,
+  },
+  {
+    hrefPatterns: [/^\/?#consult\/?$/i],
+    label: okuMarketingLinkCopy.footerConsultation.label,
+    sourceLabels: okuMarketingLinkCopy.footerConsultation.sourceLabels,
+    targetHref: okuMarketingLinkCopy.footerConsultation.targetHref,
+  },
+  {
+    hrefPatterns: [/^\/?#quiz\/?$/i],
+    label: okuMarketingLinkCopy.assessmentEntry.label,
+    sourceLabels: okuMarketingLinkCopy.assessmentEntry.sourceLabels,
+    targetHref: okuMarketingLinkCopy.assessmentEntry.targetHref,
+  },
+] as const;
 
 const ROUTES = routesJson as Record<RouteSlug, WpRouteRecord>;
 const STYLESHEETS = stylesheetsJson as string[];
@@ -103,6 +127,10 @@ function readGeneratedStyleFile(fileName: string): string {
 function normalizeExtractedHtml(rawHtml: string): string {
   let normalized = rawHtml;
 
+  for (const rewrite of okuMarketingCopyRewrite) {
+    normalized = normalized.replaceAll(rewrite.from, rewrite.to);
+  }
+
   for (const origin of SITE_ORIGINS) {
     normalized = normalized.replaceAll(`href="${origin}"`, 'href="/"');
     normalized = normalized.replaceAll(`href='${origin}'`, "href='/'");
@@ -116,6 +144,37 @@ function normalizeExtractedHtml(rawHtml: string): string {
   }
 
   normalized = normalized.replaceAll("&#038;", "&");
+
+  const $ = load(normalized);
+  $("a[href]").each((_, node) => {
+    const anchor = $(node);
+    const href = anchor.attr("href");
+    if (!href) {
+      return;
+    }
+
+    const label = anchor.text().trim();
+    for (const rewrite of MARKETING_LINK_REWRITES) {
+      const matchesHref = rewrite.hrefPatterns.some((pattern) =>
+        pattern.test(href),
+      );
+      const matchesLabel = rewrite.sourceLabels.some(
+        (sourceLabel) => sourceLabel === label,
+      );
+
+      if (!matchesHref && !matchesLabel) {
+        continue;
+      }
+
+      anchor.attr("href", rewrite.targetHref);
+      if (matchesLabel) {
+        anchor.text(rewrite.label);
+      }
+      break;
+    }
+  });
+
+  normalized = $.html();
   return normalized;
 }
 

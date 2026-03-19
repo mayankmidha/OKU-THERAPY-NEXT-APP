@@ -23,15 +23,19 @@ export async function GET() {
         clientProfile: {
           select: {
             id: true,
-            firstName: true,
-            lastName: true
+            dateOfBirth: true,
+            gender: true,
+            medicalHistory: true
           }
         },
         practitionerProfile: {
           select: {
             id: true,
             licenseNumber: true,
-            specialization: true
+            specialization: true,
+            bio: true,
+            hourlyRate: true,
+            isVerified: true
           }
         }
       }

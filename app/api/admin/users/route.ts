@@ -2,6 +2,17 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
+type AdminUserRecord = {
+  createdAt: Date
+  email: string
+  id: string
+  name: string | null
+  practitionerProfile: {
+    isVerified: boolean
+  } | null
+  role: 'ADMIN' | 'CLIENT' | 'PRACTITIONER'
+}
+
 export async function GET() {
   try {
     const session = await auth()
@@ -10,17 +21,26 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    if (session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const users = await prisma.user.findMany({
-      include: {
+      select: {
+        createdAt: true,
+        email: true,
+        id: true,
+        name: true,
         practitionerProfile: {
           select: {
-            isVerified: true
-          }
-        }
+            isVerified: true,
+          },
+        },
+        role: true,
       },
       orderBy: {
         createdAt: 'desc'
-      }
+      },
     })
 
     return NextResponse.json(users)
@@ -41,7 +61,14 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { userId, verified } = await req.json()
+    if (session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const { userId, verified } = (await req.json()) as {
+      userId?: string
+      verified?: boolean
+    }
 
     if (!userId) {
       return NextResponse.json(
@@ -50,7 +77,13 @@ export async function PATCH(req: Request) {
       )
     }
 
-    // Update practitioner verification status
+    if (typeof verified !== 'boolean') {
+      return NextResponse.json(
+        { error: 'Verification state must be a boolean' },
+        { status: 400 }
+      )
+    }
+
     const updatedUser = await prisma.practitionerProfile.update({
       where: {
         userId: userId
@@ -60,7 +93,7 @@ export async function PATCH(req: Request) {
       }
     })
 
-    return NextResponse.json(updatedUser)
+    return NextResponse.json(updatedUser as AdminUserRecord['practitionerProfile'])
   } catch (error) {
     console.error('Error updating user verification:', error)
     return NextResponse.json(
