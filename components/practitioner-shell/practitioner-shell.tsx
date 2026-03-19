@@ -18,6 +18,7 @@ type PractitionerShellProps = {
 
 type PractitionerSectionCardProps = {
   action?: ReactNode
+  actions?: ReactNode
   children: ReactNode
   className?: string
   description?: string
@@ -160,6 +161,7 @@ export function PractitionerLoadingState({ message }: PractitionerLoadingStatePr
 
 export function PractitionerSectionCard({
   action,
+  actions,
   children,
   className = '',
   description,
@@ -177,7 +179,12 @@ export function PractitionerSectionCard({
           <h2 className="text-lg font-semibold tracking-tight text-slate-950 sm:text-xl">{title}</h2>
           {description ? <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p> : null}
         </div>
-        {action ? <div className="shrink-0">{action}</div> : null}
+        {action || actions ? (
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            {action ? <div>{action}</div> : null}
+            {actions ? <div>{actions}</div> : null}
+          </div>
+        ) : null}
       </div>
       {children}
     </section>

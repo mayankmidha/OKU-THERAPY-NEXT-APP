@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
 import { BrandAuthShell } from '@/components/brand-auth-shell'
+import { okuCtaCopy } from '@/lib/cta-copy'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -67,21 +68,21 @@ export default function LoginPage() {
 
   return (
     <BrandAuthShell
-      description="Return to your secure OKU Therapy workspace to review appointments, assessments, and the next steps in care."
-      eyebrow="Login"
+      description={okuCtaCopy.entry.loginDescription}
+      eyebrow={okuCtaCopy.entry.loginBadge}
       footer={
         <p>
           Don&apos;t have an account yet?{' '}
           <Link className="font-medium text-[#2f6a5b] transition hover:text-stone-900" href="/auth/signup">
-            Create one here
+            Create a private account
           </Link>
         </p>
       }
-      title="Continue to your care space"
+      title={okuCtaCopy.entry.loginTitle}
     >
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.28em] text-stone-500">Private access</p>
-        <h2 className="mt-3 font-serif text-3xl text-stone-950">Sign in calmly, pick up where you left off.</h2>
+        <h2 className="mt-3 font-serif text-3xl text-stone-950">Sign in calmly and continue without friction.</h2>
         <p className="mt-3 max-w-xl text-sm leading-7 text-stone-600">
           Clients, practitioners, and admins are routed into the right workspace after sign-in.
         </p>
@@ -137,7 +138,7 @@ export default function LoginPage() {
         </div>
 
         <div className="rounded-[24px] border border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-600">
-          Password reset is not yet live in the MVP, so use one of the seeded accounts while testing preview environments.
+          Password reset is not yet live in the MVP. Use one of the seeded accounts while testing preview environments.
         </div>
 
         <button
@@ -145,7 +146,7 @@ export default function LoginPage() {
           disabled={isLoading}
           type="submit"
         >
-          {isLoading ? 'Signing in...' : 'Continue to workspace'}
+          {isLoading ? 'Signing in...' : 'Continue securely'}
         </button>
       </form>
 

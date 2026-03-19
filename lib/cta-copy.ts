@@ -4,14 +4,14 @@ export const okuCtaCopy = {
     description:
       'Private, calm access into the OKU Therapy workspace for clients, practitioners, and admins.',
     label: 'Start a confidential consultation',
-    loginBadge: 'Secure access',
+    loginBadge: 'Secure entry',
     loginDescription:
-      'Sign in to your private OKU Therapy workspace. You will be routed to the right dashboard automatically.',
+      'Sign in to your private OKU Therapy workspace. You will land in the right dashboard automatically.',
     loginTitle: 'Welcome back',
     signupBadge: 'Private onboarding',
     signupDescription:
       'Create a secure client or practitioner account and step into the right level of access.',
-    signupTitle: 'Start your private care journey',
+    signupTitle: 'Create your private OKU account',
   },
   carePromise: {
     heading: 'Private by design',
@@ -24,7 +24,7 @@ export const okuCtaCopy = {
   authHighlights: {
     login: [
       {
-        detail: 'Private sign-in with role-aware handoff into the app.',
+        detail: 'Private sign-in with a role-aware handoff into the app.',
         label: 'Protected entry',
       },
       {

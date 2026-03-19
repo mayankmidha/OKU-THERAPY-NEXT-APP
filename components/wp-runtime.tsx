@@ -235,6 +235,21 @@ export function WpRuntime({ bodyClass }: WpRuntimeProps) {
     document.body.className = bodyClass;
 
     const cleanups: Array<() => void> = [];
+    const siteHeader = document.getElementById("site-header");
+
+    if (siteHeader) {
+      const syncStickyHeader = () => {
+        siteHeader.classList.toggle("wp-site-header-sticky", window.scrollY > 12);
+      };
+
+      window.addEventListener("scroll", syncStickyHeader, { passive: true });
+      syncStickyHeader();
+
+      cleanups.push(() => {
+        window.removeEventListener("scroll", syncStickyHeader);
+        siteHeader.classList.remove("wp-site-header-sticky");
+      });
+    }
 
     const textRotationTarget = document.querySelector<HTMLElement>(
       "#change .elementor-heading-title",

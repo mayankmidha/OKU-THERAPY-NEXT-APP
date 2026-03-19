@@ -72,7 +72,7 @@ export default function PractitionerProfilePage() {
   const [draftBio, setDraftBio] = useState(() => loadStoredDraft().bio)
   const [draftRate, setDraftRate] = useState(() => loadStoredDraft().rate)
   const [draftSpecializations, setDraftSpecializations] = useState(() => loadStoredDraft().specializations)
-  const [message, setMessage] = useState('Profile changes are saved automatically.')
+  const [message, setMessage] = useState('Profile changes saved.')
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -128,14 +128,14 @@ export default function PractitionerProfilePage() {
   }
 
   const saveDraft = () => {
-    setMessage('Profile updated.')
+    setMessage('Profile changes saved.')
   }
 
   return (
     <PractitionerShell
       badge="Profile"
       currentPath="/practitioner/profile"
-      description="Review the verified profile clients see and keep an editable preview of updates until profile syncing is available."
+      description="Review the verified profile clients see and update your public details from one place."
       headerActions={
         <button
           className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-950"
@@ -168,7 +168,7 @@ export default function PractitionerProfilePage() {
           accent="from-sky-500 to-cyan-500"
           detail="Whether your profile is ready for client-facing use."
           label="Verification"
-          value={profile?.isVerified ? 'Verified' : 'Pending'}
+          value={profile?.isVerified ? 'Verified' : 'Pending review'}
         />
         <PractitionerStatCard
           accent="from-emerald-500 to-teal-500"
@@ -178,7 +178,7 @@ export default function PractitionerProfilePage() {
         />
         <PractitionerStatCard
           accent="from-violet-500 to-indigo-500"
-          detail="Specializations surfaced in your profile or update preview."
+          detail="Specializations shown on your profile."
           label="Specializations"
           value={profile?.specialization.length ?? draftSpecializations.split(',').map((item) => item.trim()).filter(Boolean).length}
         />
@@ -191,7 +191,7 @@ export default function PractitionerProfilePage() {
               {profile?.isVerified ? 'Verified' : 'Pending review'}
             </PractitionerPill>
           }
-          description="This is the live profile clients see."
+          description="This is the profile information clients see when they open your page."
           title="Current profile"
         >
           <dl className="space-y-4 text-sm">
@@ -219,9 +219,9 @@ export default function PractitionerProfilePage() {
         </PractitionerSectionCard>
 
         <PractitionerSectionCard
-          action={<span className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">Profile preview</span>}
-          description="These controls keep an editable preview until profile syncing is available."
-          title="Profile updates"
+          action={<span className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">Editable</span>}
+          description="Use these controls to update your public details."
+          title="Profile details"
         >
           <div className="rounded-[1.5rem] border border-sky-200 bg-sky-50/70 px-4 py-3 text-sm text-sky-800">{message}</div>
           <div className="mt-5 space-y-5">
@@ -258,7 +258,7 @@ export default function PractitionerProfilePage() {
               onClick={saveDraft}
               type="button"
             >
-              Save changes
+              Save profile
             </button>
           </div>
         </PractitionerSectionCard>

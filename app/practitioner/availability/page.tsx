@@ -52,7 +52,7 @@ export default function PractitionerAvailabilityPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [slots, setSlots] = useState<AvailabilitySlot[]>(() => loadStoredSlots())
-  const [message, setMessage] = useState('Availability changes are saved automatically.')
+  const [message, setMessage] = useState('Availability updated.')
 
   useEffect(() => {
     if (status === 'loading') {
@@ -91,7 +91,7 @@ export default function PractitionerAvailabilityPage() {
     <PractitionerShell
       badge="Availability"
       currentPath="/practitioner/availability"
-      description="Keep a polished weekly schedule of your working hours. Changes are saved automatically in this workspace."
+      description="Keep a polished weekly schedule of your working hours with quick edits for every day of the week."
       headerActions={
         <button
           className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-950"
@@ -126,16 +126,17 @@ export default function PractitionerAvailabilityPage() {
         />
         <PractitionerStatCard
           accent="from-violet-500 to-indigo-500"
-          detail="Ready for future scheduling sync."
-          label="Save status"
-          value="Automatic"
+          detail="The current availability set visible to the practice."
+          label="Schedule status"
+          value="Up to date"
         />
       </div>
 
       <div className="mt-6">
         <PractitionerSectionCard
-          action={<PractitionerPill tone="sky">Saved automatically</PractitionerPill>}
-          description="Set weekly hours, block off time, and keep your schedule easy to review."
+          action={<PractitionerPill tone="sky">Week view</PractitionerPill>}
+          actions={<PractitionerPill tone="emerald">Saved</PractitionerPill>}
+          description="Set weekly hours, block off time, and keep your schedule easy to scan."
           title="Availability grid"
         >
           <div className="mb-5 rounded-[1.5rem] border border-sky-200 bg-sky-50/70 px-4 py-3 text-sm text-sky-800">

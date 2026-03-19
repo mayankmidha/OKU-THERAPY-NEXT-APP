@@ -48,7 +48,7 @@ export default async function AdminAnalyticsPage() {
           </AdminActionLink>
         </>
       }
-      description="A compact read on platform health and practitioner approval."
+      description="A compact read on platform health."
       title="Analytics"
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -61,19 +61,13 @@ export default async function AdminAnalyticsPage() {
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <AdminPanel className="p-6" tone="light">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Revenue</p>
-              <h2 className="mt-2 text-xl font-semibold text-slate-950">Completed session volume</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                Payment totals attached to completed appointments.
-              </p>
-            </div>
-            <AdminStatusPill tone={totalRevenue ? 'success' : 'neutral'}>
-              {totalRevenue ? 'Live data' : 'No completed revenue yet'}
-            </AdminStatusPill>
-          </div>
+        <AdminPanel
+          action={<AdminStatusPill tone={totalRevenue ? 'success' : 'neutral'}>{totalRevenue ? 'Live data' : 'No revenue yet'}</AdminStatusPill>}
+          className="p-6"
+          description="Payment totals attached to completed appointments."
+          title="Completed revenue"
+          tone="light"
+        >
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -87,13 +81,18 @@ export default async function AdminAnalyticsPage() {
           </div>
 
           <div className="mt-6 rounded-2xl border border-sky-100 bg-sky-50 px-4 py-4 text-sm leading-6 text-sky-800">
-            A compact live read on onboarding, verification, and session activity.
+            Live read on onboarding, verification, and session activity.
           </div>
         </AdminPanel>
 
         <div className="space-y-6">
-          <AdminPanel className="p-6" tone="dark">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-200/80">Verification balance</p>
+          <AdminPanel
+            action={<AdminStatusPill tone={pendingPractitioners ? 'warning' : 'success'}>{pendingPractitioners ? `${pendingPractitioners} pending` : 'Clear'}</AdminStatusPill>}
+            className="p-6"
+            description="Current approval balance."
+            title="Verification queue"
+            tone="dark"
+          >
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                 <p className="text-sm text-slate-300">Verified</p>
@@ -106,13 +105,7 @@ export default async function AdminAnalyticsPage() {
             </div>
           </AdminPanel>
 
-          <AdminPanel className="p-6" tone="light">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Phase 1 note</p>
-            <h2 className="mt-2 text-lg font-semibold text-slate-950">Purpose of this page</h2>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
-              This page stays intentionally compact while the core workflow matures.
-            </p>
-          </AdminPanel>
+          <AdminPanel className="p-6" description="Expanded charts come later." title="Phase 1 scope" tone="light" />
         </div>
       </div>
     </AdminShell>

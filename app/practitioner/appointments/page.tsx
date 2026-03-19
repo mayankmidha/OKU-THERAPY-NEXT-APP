@@ -89,7 +89,7 @@ export default function PractitionerAppointmentsPage() {
     <PractitionerShell
       badge="Schedule"
       currentPath="/practitioner/appointments"
-      description="Review today's calendar, weekly flow, and client context in a calmer, premium workspace."
+      description="Review today's calendar, weekly flow, and client context in one calm workspace."
       headerActions={
         <button
           className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-950"
@@ -141,11 +141,14 @@ export default function PractitionerAppointmentsPage() {
       <div className="mt-6">
         <PractitionerSectionCard
           action={
+            <PractitionerPill tone="sky">Today</PractitionerPill>
+          }
+          actions={
             <Link className="text-sm font-medium text-sky-700 transition hover:text-sky-900" href="/practitioner/clients">
               View clients
             </Link>
           }
-          description="Today's sessions are shown here with time, client context, and note previews."
+          description="Today's sessions are shown here with time, client context, and note summaries."
           title="Today's calendar"
         >
           {appointments.length > 0 ? (

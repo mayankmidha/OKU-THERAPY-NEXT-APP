@@ -5,9 +5,14 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { BrandAuthShell } from '@/components/brand-auth-shell'
+import { okuCtaCopy } from '@/lib/cta-copy'
 
 const roles = [
-  { label: 'Client', value: 'CLIENT', description: 'Book sessions, complete assessments, and track your care journey.' },
+  {
+    label: 'Client',
+    value: 'CLIENT',
+    description: 'Book sessions, complete assessments, and track your care journey.',
+  },
   {
     label: 'Practitioner',
     value: 'PRACTITIONER',
@@ -61,17 +66,17 @@ export default function SignupPage() {
 
   return (
     <BrandAuthShell
-      description="Create your OKU Therapy access point and we will route you into the right workspace for care, practice, or platform management."
-      eyebrow="Signup"
+      description={okuCtaCopy.entry.signupDescription}
+      eyebrow={okuCtaCopy.entry.signupBadge}
       footer={
         <p>
           Already have access?{' '}
           <Link className="font-medium text-[#2f6a5b] transition hover:text-stone-900" href="/auth/login">
-            Sign in here
+            Sign in securely
           </Link>
         </p>
       }
-      title="Create your OKU account"
+      title={okuCtaCopy.entry.signupTitle}
     >
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.28em] text-stone-500">Create access</p>

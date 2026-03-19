@@ -67,7 +67,7 @@ export default async function AdminUsersPage() {
           Back to dashboard
         </AdminActionLink>
       }
-      description="Browse accounts, see verification status, and open any profile."
+      description="Browse accounts and open any profile."
       title="User directory"
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -78,19 +78,13 @@ export default async function AdminUsersPage() {
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.7fr_1fr]">
-        <AdminPanel className="overflow-hidden" tone="light">
-          <div className="flex flex-col gap-3 border-b border-slate-100 px-6 py-5 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">User list</p>
-              <h2 className="mt-2 text-lg font-semibold text-slate-950">All accounts</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                The list stays compact so the admin team can quickly find who joined, who is verified, and who still needs review.
-              </p>
-            </div>
-            <AdminStatusPill tone={pendingPractitioners ? 'warning' : 'success'}>
-              {pendingPractitioners ? `${pendingPractitioners} pending` : 'All practitioners verified'}
-            </AdminStatusPill>
-          </div>
+        <AdminPanel
+          action={<AdminStatusPill tone={pendingPractitioners ? 'warning' : 'success'}>{pendingPractitioners ? `${pendingPractitioners} pending` : 'All practitioners verified'}</AdminStatusPill>}
+          className="overflow-hidden"
+          description="Newest accounts first."
+          title="All accounts"
+          tone="light"
+        >
 
           {users.length ? (
             <div className="overflow-x-auto">
@@ -163,17 +157,19 @@ export default async function AdminUsersPage() {
         </AdminPanel>
 
         <div className="space-y-6">
-          <AdminPanel className="p-6" tone="light">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Operational note</p>
-            <h2 className="mt-2 text-lg font-semibold text-slate-950">Verification workflow</h2>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
-              Practitioner review stays simple in Phase 1. This directory gives the team a quick audit trail and direct access to
-              each account.
-            </p>
-          </AdminPanel>
+          <AdminPanel
+            className="p-6"
+            description="Quick audit trail for the team."
+            title="Verification workflow"
+            tone="light"
+          />
 
-          <AdminPanel className="p-6" tone="dark">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-200/80">Verification balance</p>
+          <AdminPanel
+            className="p-6"
+            description="Current balance of approvals."
+            title="Verification balance"
+            tone="dark"
+          >
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                 <p className="text-sm text-slate-300">Verified</p>

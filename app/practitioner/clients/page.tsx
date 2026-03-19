@@ -86,7 +86,7 @@ export default function PractitionerClientsPage() {
     <PractitionerShell
       badge="Caseload"
       currentPath="/practitioner/clients"
-      description="A premium view of the people already in your care, with search, context, and gentle visual hierarchy."
+      description="A polished view of the people already in your care, with fast search and at-a-glance context."
       headerActions={
         <button
           className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-950"
@@ -117,19 +117,19 @@ export default function PractitionerClientsPage() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <PractitionerStatCard
           accent="from-sky-500 to-cyan-500"
-          detail="Clients currently visible in your caseload."
+          detail="Clients currently in your caseload."
           label="Total clients"
           value={clients.length}
         />
         <PractitionerStatCard
           accent="from-emerald-500 to-teal-500"
-          detail="How many clients match the current search."
+          detail="Clients matching the current search."
           label="Search results"
           value={filteredClients.length}
         />
         <PractitionerStatCard
           accent="from-violet-500 to-indigo-500"
-          detail="Most recently surfaced client session."
+          detail="Most recently surfaced client visit."
           label="Latest session"
           value={recentSessionDate}
         />
@@ -138,11 +138,9 @@ export default function PractitionerClientsPage() {
       <div className="mt-6">
         <PractitionerSectionCard
           action={
-            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-              Search
-            </span>
+            <PractitionerPill tone="sky">Caseload</PractitionerPill>
           }
-          description="Search by client name or email. The list stays tied to the current practice data."
+          description="Search by client name or email. The list stays tied to your current practice data."
           title="Client directory"
         >
           <div className="mb-5">

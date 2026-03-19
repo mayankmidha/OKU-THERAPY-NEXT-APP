@@ -38,9 +38,12 @@ type AdminStatusPillProps = {
 type AdminPanelTone = 'light' | 'dark' | 'soft'
 
 type AdminPanelProps = {
-  children: ReactNode
+  children?: ReactNode
   className?: string
   tone?: AdminPanelTone
+  title?: string
+  description?: string
+  action?: ReactNode
 }
 
 type AdminActionKind = 'primary' | 'secondary' | 'ghost' | 'danger'
@@ -197,8 +200,32 @@ export function AdminStatusPill({ children, tone = 'neutral' }: AdminStatusPillP
   )
 }
 
-export function AdminPanel({ children, className = '', tone = 'light' }: AdminPanelProps) {
-  return <section className={`rounded-[1.75rem] border ${panelToneClasses[tone]} ${className}`.trim()}>{children}</section>
+export function AdminPanel({
+  action,
+  children,
+  className = '',
+  description,
+  title,
+  tone = 'light',
+}: AdminPanelProps) {
+  return (
+    <section className={`rounded-[1.75rem] border ${panelToneClasses[tone]} ${className}`.trim()}>
+      {title || description || action ? (
+        <div className="flex items-start justify-between gap-4 border-b border-current/10 px-6 py-5">
+          <div>
+            {title ? <h2 className="text-lg font-semibold tracking-tight">{title}</h2> : null}
+            {description ? (
+              <p className={`mt-1 text-sm leading-6 ${tone === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
+                {description}
+              </p>
+            ) : null}
+          </div>
+          {action ? <div className="shrink-0">{action}</div> : null}
+        </div>
+      ) : null}
+      {children}
+    </section>
+  )
 }
 
 export function AdminActionButton({

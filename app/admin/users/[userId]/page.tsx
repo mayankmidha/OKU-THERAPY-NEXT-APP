@@ -88,21 +88,19 @@ export default async function AdminUserDetailPage({
           </AdminActionLink>
         </>
       }
-      description="A focused profile view for the admin team."
+      description="A focused profile view."
       maxWidth="5xl"
       title="User profile"
     >
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <AdminPanel className="p-6" tone="light">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Identity</p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{user.name ?? 'Unnamed user'}</h2>
-              <p className="mt-2 text-sm text-slate-600">{user.email}</p>
-              <p className="mt-1 text-sm text-slate-500">Joined {joinedAt}</p>
-            </div>
-            <AdminStatusPill tone={rolePill.tone}>{rolePill.label}</AdminStatusPill>
-          </div>
+        <AdminPanel
+          action={<AdminStatusPill tone={rolePill.tone}>{rolePill.label}</AdminStatusPill>}
+          className="p-6"
+          description={user.email}
+          title={user.name ?? 'Unnamed user'}
+          tone="light"
+        >
+          <p className="text-sm text-slate-500">Joined {joinedAt}</p>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -125,18 +123,20 @@ export default async function AdminUserDetailPage({
         </AdminPanel>
 
         <div className="space-y-6">
-          <AdminPanel className="p-6" tone="dark">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-200/80">Account summary</p>
+          <AdminPanel className="p-6" description="Current access and review state." title="Account summary" tone="dark">
             <div className="mt-4 space-y-3 text-sm leading-6 text-slate-300">
-              <p>This profile shows the current admin record for access, verification, and practitioner metadata.</p>
-              <p>For Phase 1, the detail page stays read-only.</p>
+              <p>Read-only record for access, verification, and practitioner metadata.</p>
             </div>
           </AdminPanel>
 
-          <AdminPanel className="p-6" tone="light">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Status</p>
+          <AdminPanel
+            action={<AdminStatusPill tone={user.role === 'PRACTITIONER' ? 'warning' : 'info'}>{user.role}</AdminStatusPill>}
+            className="p-6"
+            description="Role and review state."
+            title="Status"
+            tone="light"
+          >
             <div className="mt-4 flex flex-wrap gap-3">
-              <AdminStatusPill tone={user.role === 'PRACTITIONER' ? 'warning' : 'info'}>{user.role}</AdminStatusPill>
               <AdminStatusPill tone={rolePill.tone}>{rolePill.label}</AdminStatusPill>
             </div>
           </AdminPanel>
@@ -144,17 +144,13 @@ export default async function AdminUserDetailPage({
       </div>
 
       {user.practitionerProfile ? (
-        <AdminPanel className="mt-6 p-6" tone="light">
-          <div className="flex flex-col gap-3 border-b border-slate-100 pb-5 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Practitioner profile</p>
-              <h2 className="mt-2 text-xl font-semibold text-slate-950">Professional details</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">Credential and profile details used for review.</p>
-            </div>
-            <AdminStatusPill tone={user.practitionerProfile.isVerified ? 'success' : 'warning'}>
-              {user.practitionerProfile.isVerified ? 'Verified' : 'Awaiting review'}
-            </AdminStatusPill>
-          </div>
+        <AdminPanel
+          action={<AdminStatusPill tone={user.practitionerProfile.isVerified ? 'success' : 'warning'}>{user.practitionerProfile.isVerified ? 'Verified' : 'Awaiting review'}</AdminStatusPill>}
+          className="mt-6 p-6"
+          description="Credential and profile details."
+          title="Professional details"
+          tone="light"
+        >
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -193,11 +189,7 @@ export default async function AdminUserDetailPage({
           </div>
         </AdminPanel>
       ) : (
-        <AdminPanel className="mt-6 p-6" tone="light">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Client profile</p>
-          <h2 className="mt-2 text-xl font-semibold text-slate-950">No practitioner record attached</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">This account is treated as a client profile.</p>
-        </AdminPanel>
+        <AdminPanel className="mt-6 p-6" description="Client account, no practitioner record attached." title="Client profile" tone="light" />
       )}
     </AdminShell>
   )
